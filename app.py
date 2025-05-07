@@ -12,7 +12,7 @@ def dashboard():
 @app.route('/about-us')
 def about_us():
     map_embed_url = "https://app.powerbi.com/view?r=eyJrIjoiNGEwZjIwY2ItZTcxNi00NDBiLWI0ZTAtYzQ1OGMxMmJmNDFkIiwidCI6ImNkY2JiMGUyLTlmZWEtNGY1NC04NjcwLTY3MjcwNzc5N2FkYSIsImMiOjEwfQ%3D%3D"
-    return render_template('about us.html', map_embed_url=map_embed_url)
+    return render_template('about_us.html', map_embed_url=map_embed_url)
 
 # Route for Contact
 @app.route('/contact')

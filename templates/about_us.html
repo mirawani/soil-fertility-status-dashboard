@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>About Us - Soil Fertility Status Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="sidebar">
+        <img src="{{ url_for('static', filename='images/logo uitm.png') }}" alt="UITM Logo" style="width: 220px; height:auto;">
+        <a href="{{ url_for('dashboard') }}" class="nav-link"><i class="fas fa-chart-bar"></i> DATA</a>
+        <a href="{{ url_for('about_us') }}" class="nav-link active"><i class="fas fa-users"></i> ABOUT US</a>
+        <a href="{{ url_for('contact') }}" class="nav-link"><i class="fas fa-envelope"></i> CONTACT</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1>SOIL FERTILITY STATUS DASHBOARD</h1>
+        </div>
+    
+        <div class="about-container">
+            <h2 class="section-title">About Us</h2>
+            
+            <div class="about-description">
+                <p>This dashboard monitors real-time and historical data on key soil indicators nitrogen, phosphorus, potassium, humidity, and temperature during vegetative phase of Harumanis. It highlights from real-time recommendations to guide the adjustment needed for optimal plant growth.</p>
+            </div>
+            
+            <div class="location-section">
+                <h3 class="location-title">Location: Plot B - Harumanis, UiTM Arau</h3>
+                <div class="powerbi-container">
+                    <iframe title="map" src="{{ map_embed_url }}" frameborder="0" allowFullScreen="true"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

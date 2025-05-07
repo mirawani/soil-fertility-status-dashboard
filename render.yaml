@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: soil-fertility-status-dashboard
+    runtime: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: gunicorn test.app:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+    plan: free

@@ -1,0 +1,23 @@
+from flask import Flask, render_template, url_for
+
+app = Flask(__name__)
+
+# Route for the dashboard
+@app.route('/')
+def dashboard():
+    embed_url = "https://app.powerbi.com/view?r=eyJrIjoiNzNkZmFjOWQtMjQ2ZS00MzFlLWFiNjYtYTgwMzFjMTExOTExIiwidCI6ImNkY2JiMGUyLTlmZWEtNGY1NC04NjcwLTY3MjcwNzc5N2FkYSIsImMiOjEwfQ%3D%3D"
+    return render_template('dashboard.html', embed_url=embed_url)
+
+# Route for About Us
+@app.route('/about-us')
+def about_us():
+    map_embed_url = "https://app.powerbi.com/view?r=eyJrIjoiNGEwZjIwY2ItZTcxNi00NDBiLWI0ZTAtYzQ1OGMxMmJmNDFkIiwidCI6ImNkY2JiMGUyLTlmZWEtNGY1NC04NjcwLTY3MjcwNzc5N2FkYSIsImMiOjEwfQ%3D%3D"
+    return render_template('about us.html', map_embed_url=map_embed_url)
+
+# Route for Contact
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)

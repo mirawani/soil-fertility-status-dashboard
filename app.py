@@ -1,3 +1,8 @@
+import os
+print(f"Current directory: {os.listdir()}")
+print(f"Templates exists?: {'templates' in os.listdir()}")
+print(f"Template files: {os.listdir('templates') if 'templates' in os.listdir() else 'No templates dir'}")
+
 from flask import Flask, render_template, url_for
 
 app = Flask(__name__)

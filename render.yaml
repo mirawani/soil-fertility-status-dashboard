@@ -4,5 +4,7 @@ services:
     runtime: python
     buildCommand: |
       pip install -r requirements.txt
-      python -c "import os; print(f'Files: {os.listdir()}'); print(f'Templates: {os.listdir(\"templates\") if os.path.exists(\"templates\") else \"Missing\"}')"
     startCommand: gunicorn app:app
+    envVars:
+      - key: FLASK_ENV
+        value: production

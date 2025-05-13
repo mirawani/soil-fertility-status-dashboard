@@ -5,14 +5,14 @@ app = Flask(__name__)
 # Route for the dashboard
 @app.route('/')
 def dashboard():
-    embed_url = "https://app.powerbi.com/view?r=eyJrIjoiNzNkZmFjOWQtMjQ2ZS00MzFlLWFiNjYtYTgwMzFjMTExOTExIiwidCI6ImNkY2JiMGUyLTlmZWEtNGY1NC04NjcwLTY3MjcwNzc5N2FkYSIsImMiOjEwfQ%3D%3D"
+    embed_url = "https://app.powerbi.com/view?r=eyJrIjoiYWU2Y2NiNWMtNDE2OS00MTc4LThjYTYtZjllY2E2NDU4NTBlIiwidCI6ImNkY2JiMGUyLTlmZWEtNGY1NC04NjcwLTY3MjcwNzc5N2FkYSIsImMiOjEwfQ%3D%3D"
     return render_template('dashboard.html', embed_url=embed_url)
 
 # Route for About Us
 @app.route('/about-us')
 def about_us():
     map_embed_url = "https://app.powerbi.com/view?r=eyJrIjoiNGEwZjIwY2ItZTcxNi00NDBiLWI0ZTAtYzQ1OGMxMmJmNDFkIiwidCI6ImNkY2JiMGUyLTlmZWEtNGY1NC04NjcwLTY3MjcwNzc5N2FkYSIsImMiOjEwfQ%3D%3D"
-    return render_template('about us.html', map_embed_url=map_embed_url)
+    return render_template('about_us.html', map_embed_url=map_embed_url)
 
 # Route for Contact
 @app.route('/contact')

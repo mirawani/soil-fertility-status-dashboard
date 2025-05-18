@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if log %}Edit{% else %}Add{% endif %} Log</title>
+</head>
+<body>
+    <h1>{% if log %}Edit{% else %}Add{% endif %} Fertilizer Log</h1>
+    <form method="post">
+        <label>Nutrient Type:</label><br>
+        <select name="nutrient" required>
+            <option value="Nitrogen" {% if log and log.nutrient_type == 'Nitrogen' %}selected{% endif %}>Nitrogen</option>
+            <option value="Phosphorus" {% if log and log.nutrient_type == 'Phosphorus' %}selected{% endif %}>Phosphorus</option>
+            <option value="Potassium" {% if log and log.nutrient_type == 'Potassium' %}selected{% endif %}>Potassium</option>
+        </select><br><br>
+
+        <label>Amount Added:</label><br>
+        <input type="number" name="amount" min="0" step="any" required value="{{ log.amount_added if log else '' }}"><br><br>
+
+        <button type="submit">{% if log %}Update{% else %}Record{% endif %}</button>
+    </form>
+    <p><a href="{{ url_for('fertilizer_log') }}">Back to log list</a></p>
+</body>
+</html>

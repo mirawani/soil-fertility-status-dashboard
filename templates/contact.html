@@ -18,9 +18,18 @@
         <a href="{{ url_for('contact') }}" class="nav-link active"><i class="fas fa-envelope"></i> CONTACT</a>
     </div>
 
-    <div class="main-content">
+   <div class="main-content">
         <div class="header">
             <h1>SOIL FERTILITY STATUS DASHBOARD</h1>
+            <div class="auth-section">
+                {% if not session.get('user_id') %}
+                    <a href="{{ url_for('login') }}" class="login-btn">Login</a>
+                {% else %}
+                    <div class="user-info">
+                        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     
         <div class="contact-container">

@@ -11,6 +11,9 @@
     <div class="sidebar">
         <img src="{{ url_for('static', filename='images/logo uitm.png') }}" alt="UITM Logo" style="width: 220px; height:auto;">
         <a href="{{ url_for('dashboard') }}" class="nav-link"><i class="fas fa-chart-bar"></i> DATA</a>
+        <a href="{{ url_for('fertilizer_log') }}" class="nav-link">
+            <i class="fas fa-seedling"></i> LOG
+        </a>
         <a href="{{ url_for('about_us') }}" class="nav-link active"><i class="fas fa-users"></i> ABOUT US</a>
         <a href="{{ url_for('contact') }}" class="nav-link"><i class="fas fa-envelope"></i> CONTACT</a>
     </div>

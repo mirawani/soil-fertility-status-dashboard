@@ -2,14 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta charset="UTF-8">
     <title>Fertilizer Log - Soil Fertility Status Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-     <div class="sidebar">
+    <div class="sidebar">
         <img src="{{ url_for('static', filename='images/logo uitm.png') }}" alt="UITM Logo" style="width: 220px; height:auto;">
         <a href="{{ url_for('dashboard') }}" class="nav-link"><i class="fas fa-chart-bar"></i> DATA</a>
         <a href="{{ url_for('fertilizer_log') }}" class="nav-link active">
@@ -19,55 +18,107 @@
         <a href="{{ url_for('contact') }}" class="nav-link"><i class="fas fa-envelope"></i> CONTACT</a>
     </div>
 
-     <div class="main-content">
+    <div class="main-content">
         <div class="header">
             <h1>SOIL FERTILITY STATUS DASHBOARD</h1>
             <div class="auth-section">
                 {% if not session.get('user_id') %}
-                    <a href="{{ url_for('login') }}" class="login-btn">Login</a>
+                    <a href="{{ url_for('login') }}" class="login-btn"><i class="fas fa-sign-in-alt"></i> Login</a>
                 {% else %}
                     <div class="user-info">
-                        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+                        <a href="{{ url_for('logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
                     </div>
                 {% endif %}
             </div>
         </div>
 
-    {% if not session.get('user_id') %}
-    <div class="login-required">
-        <h2 style="color: #4CAF50;">Please login to view the fertilizer log</h2>
-    </div>
-    {% else %}
-        <h1>Fertilizer Log</h1>
-        <p><a href="{{ url_for('add_log') }}">Add New Log</a></p>
-
-        {% if logs %}
-        <table border="1" cellpadding="8" cellspacing="0">
-            <thead>
-                <tr>
-                    <th>Nutrient Type</th>
-                    <th>Amount Added</th>
-                    <th>Timestamp</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for log in logs %}
-                <tr>
-                    <td>{{ log.nutrient_type }}</td>
-                    <td>{{ log.amount_added }}</td>
-                    <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                    <td>
-                        <a href="{{ url_for('edit_log', log_id=log.id) }}">Edit</a> |
-                        <a href="{{ url_for('delete_log', log_id=log.id) }}" onclick="return confirm('Delete this log?');">Delete</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        {% if not session.get('user_id') %}
+        <div class="login-required">
+            <h2 style="color: #4CAF50;">Please login to view the fertilizer log</h2>
+        </div>
         {% else %}
-            <p>No logs yet.</p>
+        <div class="log-container">
+            <h2 class="section-title">Fertilizer Log</h2>
+            
+            <div class="log-controls">
+                <a href="{{ url_for('add_log') }}" class="add-log-btn">
+                    <i class="fas fa-plus"></i> Add New Log
+                </a>
+                
+                <form method="GET" action="{{ url_for('fertilizer_log') }}" class="search-form">
+                    <input type="date" name="search_date" placeholder="Search by date">
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                    {% if request.args.get('search_date') %}
+                        <a href="{{ url_for('fertilizer_log') }}" class="clear-search-btn">
+                            <i class="fas fa-times"></i> Clear
+                        </a>
+                    {% endif %}
+                </form>
+            </div>
+
+            {% if logs %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nutrient Type</th>
+                            <th>Amount Added (g)</th>
+                            <th>Timestamp</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                        <tr>
+                            <td>{{ log.nutrient_type }}</td>
+                            <td>{{ log.amount_added }}</td>
+                            <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <td>
+                                <a href="{{ url_for('edit_log', log_id=log.id) }}" class="action-btn edit-btn">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a href="{{ url_for('delete_log', log_id=log.id) }}" onclick="return confirm('Delete this log?');" class="action-btn delete-btn">
+                                    <i class="fas fa-trash-alt"></i> Delete
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                {% if pagination.has_prev %}
+                    <a href="{{ url_for('fertilizer_log', page=pagination.prev_num, search_date=request.args.get('search_date')) }}" class="page-link">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                {% endif %}
+
+                {% for page_num in pagination.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num != pagination.page %}
+                            <a href="{{ url_for('fertilizer_log', page=page_num, search_date=request.args.get('search_date')) }}" class="page-link">{{ page_num }}</a>
+                        {% else %}
+                            <span class="current-page">{{ page_num }}</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="ellipsis">...</span>
+                    {% endif %}
+                {% endfor %}
+
+                {% if pagination.has_next %}
+                    <a href="{{ url_for('fertilizer_log', page=pagination.next_num, search_date=request.args.get('search_date')) }}" class="page-link">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                {% endif %}
+            </div>
+            {% else %}
+                <p class="no-logs">No logs found.</p>
+            {% endif %}
         {% endif %}
-    {% endif %}
+        </div>
+    </div>
 </body>
 </html>

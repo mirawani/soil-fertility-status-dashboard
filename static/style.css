@@ -201,8 +201,10 @@ iframe {
 }
 
 /* Authentication Pages */
+
+/* Authentication Pages */
 .auth-page {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: linear-gradient(135deg, #2e7d32, #4caf50, #81c784);
     min-height: 100vh;
     margin: 0;
     display: flex;
@@ -220,7 +222,7 @@ iframe {
 .auth-card {
     background-color: white;
     border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     padding: 40px;
     text-align: center;
 }
@@ -239,7 +241,7 @@ iframe {
 }
 
 .auth-header h2 {
-    color: var(--primary-color);
+    color: #2e7d32; /* Dark green */
     margin: 0 0 10px 0;
     font-size: 28px;
     font-weight: 600;
@@ -266,7 +268,7 @@ iframe {
     left: 15px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--primary-color);
+    color: #2e7d32; /* Dark green */
     font-size: 16px;
 }
 
@@ -281,13 +283,13 @@ iframe {
 }
 
 .auth-form input:focus {
-    border-color: var(--primary-color);
+    border-color: #2e7d32; /* Dark green */
     outline: none;
-    box-shadow: 0 0 0 3px rgba(74, 139, 74, 0.2);
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
 }
 
 .auth-btn {
-    background-color: var(--primary-color);
+    background: linear-gradient(to right, #2e7d32, #4caf50); /* Green gradient */
     color: white;
     border: none;
     padding: 14px;
@@ -298,12 +300,31 @@ iframe {
     font-size: 16px;
     margin-top: 10px;
     width: 100%;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.auth-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, #1b5e20, #2e7d32); /* Darker green gradient for hover */
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: -1;
+}
+
+.auth-btn:hover::before {
+    opacity: 1;
 }
 
 .auth-btn:hover {
-    background-color: #3a7a3a;
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .auth-footer {
@@ -313,7 +334,7 @@ iframe {
 }
 
 .auth-footer a {
-    color: var(--primary-color);
+    color: #2e7d32; /* Dark green */
     text-decoration: none;
     font-weight: 600;
     transition: all 0.3s;
@@ -321,7 +342,7 @@ iframe {
 
 .auth-footer a:hover {
     text-decoration: underline;
-    color: #3a7a3a;
+    color: #1b5e20; /* Darker green */
 }
 
 /* Auth Section Styling */
@@ -368,12 +389,22 @@ iframe {
 
 .login-required {
     text-align: center;
-    margin-top: 50px;
-    padding: 20px;
-    background-color: #f8f9fa;
+    margin: 80px auto 0; /* top | horizontal | bottom */
+    padding: 30px 40px; /* vertical | horizontal */
+    background-color: white;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: fit-content; /* Makes container width match content */
+    max-width: 90%; /* Prevents it from being too wide on small screens */
 }
+
+.login-required h2 {
+    color: #4CAF50; /* Matching your green color */
+    margin: 0 0 15px 0; /* Removes default h2 margin */
+    font-size: 1.5rem; /* Slightly larger than normal text */
+    font-weight: 600;
+}
+
 
 .login-required .login-btn {
     display: inline-block;
@@ -388,4 +419,210 @@ iframe {
 
 .login-required .login-btn:hover {
     background-color: #45a049;
+}
+
+
+/* Log Page Styles */
+.log-container {
+    padding: 30px;
+    max-width: 1000px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.section-title {
+    text-align: center;
+    color: var(--primary-color);
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 30px;
+}
+
+.log-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.add-log-btn {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.add-log-btn:hover {
+    background-color: #3a7a3a;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.search-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.search-form input[type="date"] {
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.search-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.search-btn:hover {
+    background-color: #3a7a3a;
+    transform: translateY(-2px);
+}
+
+.clear-search-btn {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.clear-search-btn:hover {
+    background-color: #d32f2f;
+    transform: translateY(-2px);
+}
+
+.table-container {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+th {
+    background-color: var(--light-gray);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+tr:hover {
+    background-color: rgba(74, 139, 74, 0.05);
+}
+
+.action-btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    margin-right: 5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.edit-btn {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.edit-btn:hover {
+    background-color: #ffb300;
+    transform: translateY(-1px);
+}
+
+.delete-btn {
+    background-color: #f44336;
+    color: white;
+}
+
+.delete-btn:hover {
+    background-color: #d32f2f;
+    transform: translateY(-1px);
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.page-link {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--text-color);
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.page-link:hover {
+    background-color: var(--light-gray);
+    transform: translateY(-1px);
+}
+
+.current-page {
+    padding: 8px 12px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.ellipsis {
+    padding: 8px;
+    color: #666;
+}
+
+.no-logs {
+    text-align: center;
+    padding: 30px;
+    background-color: white;
+    border-radius: 10px;
+    color: #666;
+    font-style: italic;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }

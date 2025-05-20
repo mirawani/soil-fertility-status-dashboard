@@ -38,6 +38,7 @@ def contact():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
+        name = request.form['name']  # Get the name from the form
         username = request.form['username']
         password = request.form['password']
         password_hash = generate_password_hash(password)
@@ -45,7 +46,10 @@ def register():
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor()
         try:
-            cursor.execute("INSERT INTO users (username, password_hash) VALUES (%s, %s)", (username, password_hash))
+            cursor.execute(
+                "INSERT INTO users (name, username, password_hash) VALUES (%s, %s, %s)",
+                (name, username, password_hash)
+            )
             conn.commit()
             flash("Registration successful. Please login.")
             return redirect(url_for('login'))
@@ -55,6 +59,7 @@ def register():
             cursor.close()
             conn.close()
     return render_template('register.html')
+
 
 # Login
 @app.route('/login', methods=['GET', 'POST'])

@@ -19,7 +19,7 @@ db_config = {
 # Home Dashboard
 @app.route('/')
 def dashboard():
-    embed_url = "https://app.powerbi.com/view?r=eyJrIjoiYWU2Y2NiNWMtNDE2OS00MTc4LThjYTYtZjllY2E2NDU4NTBlIiwidCI6ImNkY2JiMGUyLTlmZWEtNGY1NC04NjcwLTY3MjcwNzc5N2FkYSIsImMiOjEwfQ%3D%3D"
+    embed_url = "https://app.powerbi.com/view?r=eyJrIjoiNjM0ZjllYmYtYTNiZS00N2FlLThlYjYtY2Q2OGYwYzQwNDNlIiwidCI6ImNkY2JiMGUyLTlmZWEtNGY1NC04NjcwLTY3MjcwNzc5N2FkYSIsImMiOjEwfQ%3D%3D"
     return render_template('dashboard.html', embed_url=embed_url)
 
 

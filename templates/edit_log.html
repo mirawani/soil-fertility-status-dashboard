@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if log %}Edit{% else %}Add{% endif %} Log - Soil Fertility Status Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="sidebar">
+        <img src="{{ url_for('static', filename='images/logo uitm.png') }}" alt="UITM Logo" style="width: 220px; height:auto;">
+        <a href="{{ url_for('dashboard') }}" class="nav-link"><i class="fas fa-chart-bar"></i> DATA</a>
+        <a href="{{ url_for('fertilizer_log') }}" class="nav-link active">
+            <i class="fas fa-seedling"></i> LOG
+        </a>
+        <a href="{{ url_for('about_us') }}" class="nav-link"><i class="fas fa-users"></i> ABOUT US</a>
+        <a href="{{ url_for('contact') }}" class="nav-link"><i class="fas fa-envelope"></i> CONTACT</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1>SOIL FERTILITY STATUS DASHBOARD</h1>
+            <div class="auth-section">
+                {% if not session.get('user_id') %}
+                    <a href="{{ url_for('login') }}" class="login-btn"><i class="fas fa-sign-in-alt"></i> Login</a>
+                {% else %}
+                    <div class="user-info">
+                        <a href="{{ url_for('logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if not session.get('user_id') %}
+        <div class="login-required">
+            <h2 style="color: #4CAF50;">Please login to manage fertilizer logs</h2>
+        </div>
+        {% else %}
+        <div class="log-container">
+            <h2 class="section-title">{% if log %}Edit{% else %}Add New{% endif %} Fertilizer Log</h2>
+            
+            <form method="post" class="log-form">
+                <div class="form-group">
+                    <label for="nutrient">Nutrient Type:</label>
+                    <select name="nutrient" id="nutrient" required>
+                        <option value="Nitrogen" {% if log and log.nutrient_type == 'Nitrogen' %}selected{% endif %}>Nitrogen</option>
+                        <option value="Phosphorus" {% if log and log.nutrient_type == 'Phosphorus' %}selected{% endif %}>Phosphorus</option>
+                        <option value="Potassium" {% if log and log.nutrient_type == 'Potassium' %}selected{% endif %}>Potassium</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="amount">Amount Added (g):</label>
+                    <input type="number" name="amount" id="amount" min="0" step="any" required value="{{ log.amount_added if log else '' }}">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-save"></i> {% if log %}Update{% else %}Record{% endif %}
+                    </button>
+                    <a href="{{ url_for('fertilizer_log') }}" class="cancel-btn">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

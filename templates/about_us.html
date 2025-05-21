@@ -10,17 +10,29 @@
 <body>
     <div class="sidebar">
         <img src="{{ url_for('static', filename='images/logo uitm.png') }}" alt="UITM Logo" style="width: 220px; height:auto;">
-        <a href="{{ url_for('dashboard') }}" class="nav-link"><i class="fas fa-chart-bar"></i> DATA</a>
-        <a href="{{ url_for('fertilizer_log') }}" class="nav-link">
-            <i class="fas fa-seedling"></i> LOG
+        <a href="{{ url_for('dashboard') }}" class="nav-link">
+            <i class="fas fa-chart-bar"></i>
+            <span>DATA</span>
         </a>
-        <a href="{{ url_for('about_us') }}" class="nav-link active"><i class="fas fa-users"></i> ABOUT US</a>
-        <a href="{{ url_for('contact') }}" class="nav-link"><i class="fas fa-envelope"></i> CONTACT</a>
+        <a href="{{ url_for('fertilizer_log') }}" class="nav-link">
+            <i class="fas fa-seedling"></i>
+            <span>LOG</span>
+        </a>
+        <a href="{{ url_for('about_us') }}" class="nav-link active">
+            <i class="fas fa-users"></i>
+            <span>ABOUT US</span>
+        </a>
+        <a href="{{ url_for('contact') }}" class="nav-link">
+            <i class="fas fa-envelope"></i>
+            <span>CONTACT</span>
+        </a>
     </div>
 
     <div class="main-content">
-        <div class="main-content">
         <div class="header">
+            <button class="sidebar-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
             <h1>SOIL FERTILITY STATUS DASHBOARD</h1>
             <div class="auth-section">
                 {% if not session.get('user_id') %}
@@ -32,7 +44,7 @@
                 {% endif %}
             </div>
         </div>
-    
+
         <div class="about-container">
             <h2 class="section-title">About Us</h2>
             
@@ -48,5 +60,34 @@
             </div>
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.querySelector('.sidebar');
+        const toggleBtn = document.querySelector('.sidebar-toggle');
+        
+        // Check localStorage for saved state
+        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        if (isCollapsed) {
+            sidebar.classList.add('collapsed');
+            toggleBtn.querySelector('i').classList.replace('fa-bars', 'fa-chevron-right');
+        }
+        
+        toggleBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+            
+            // Save state to localStorage
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+            
+            // Change the icon
+            const icon = this.querySelector('i');
+            if (sidebar.classList.contains('collapsed')) {
+                icon.classList.replace('fa-bars', 'fa-chevron-right');
+            } else {
+                icon.classList.replace('fa-chevron-right', 'fa-bars');
+            }
+        });
+    });
+    </script>
 </body>
 </html>

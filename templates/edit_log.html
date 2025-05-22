@@ -6,6 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <!-- Add this CSS in the head section -->
+<style>
+    /* Status color indicators */
+    .status-indicator {
+        display: inline-block;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        margin-right: 8px;
+        vertical-align: middle;
+    }
+    
+    .status-red { background-color: #f44336; }
+    .status-orange { background-color: #ff9800; }
+    .status-yellow { background-color: #ffeb3b; }
+    .status-light-green { background-color: #8bc34a; }
+    .status-dark-green { background-color: #4caf50; }
+</style>
+
 </head>
 <body>
     <div class="sidebar">
@@ -66,6 +86,24 @@
                 <div class="form-group">
                     <label for="amount">Amount Added (g):</label>
                     <input type="number" name="amount" id="amount" min="0" step="any" required value="{{ log.amount_added if log else '' }}">
+                    <div class="form-group">
+    <label for="post_reading">Post Reading :</label>
+    <input type="number" name="post_reading" id="post_reading" min="0" step="any" required 
+           value="{{ log.post_reading if log else '' }}">
+</div>
+
+<div class="form-group">
+    <label for="status_color">Status Color:</label>
+    <select name="status_color" id="status_color" required>
+        <option value="red" {% if log and log.status_color == 'red' %}selected{% endif %}>Red</option>
+        <option value="orange" {% if log and log.status_color == 'orange' %}selected{% endif %}>Orange</option>
+        <option value="yellow" {% if log and log.status_color == 'yellow' %}selected{% endif %}>Yellow</option>
+        <option value="light-green" {% if log and log.status_color == 'light-green' %}selected{% endif %}>Light Green</option>
+        <option value="dark-green" {% if log and log.status_color == 'dark-green' %}selected{% endif %}>Dark Green</option>
+    </select>
+</div>
+
+
                 </div>
                 
                 <div class="form-actions">

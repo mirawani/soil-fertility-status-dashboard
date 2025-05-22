@@ -158,21 +158,21 @@ def fertilizer_log():
     )
 
 # Add New Log
+# In the add_log route
 @app.route('/add_log', methods=['GET', 'POST'])
 def add_log():
-    if 'user_id' not in session:
-        flash("Please log in to add a fertilizer log.")
-        return redirect(url_for('login'))
-
     if request.method == 'POST':
-        nutrient = request.form['nutrient']
-        amount = request.form['amount']
+        nutrient = request.form['nutrient'] 
+        amount = request.form['amount']      
+        post_reading = request.form['post_reading']  
+        status_color = request.form['status_color']  
+
         user_id = session['user_id']
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO fertilizer_logs (nutrient_type, amount_added, user_id) VALUES (%s, %s, %s)",
-            (nutrient, amount, user_id)
+            "INSERT INTO fertilizer_logs (nutrient_type, amount_added, post_reading, status_color, user_id) VALUES (%s, %s, %s, %s, %s)",
+            (nutrient, amount, post_reading, status_color, user_id)
         )
         conn.commit()
         cursor.close()
@@ -202,9 +202,11 @@ def edit_log(log_id):
     if request.method == 'POST':
         nutrient = request.form['nutrient']
         amount = request.form['amount']
+        post_reading = request.form['post_reading']
+        status_color = request.form['status_color']
         cursor.execute(
-            "UPDATE fertilizer_logs SET nutrient_type=%s, amount_added=%s WHERE id=%s",
-            (nutrient, amount, log_id)
+            "UPDATE fertilizer_logs SET nutrient_type=%s, amount_added=%s, post_reading=%s, status_color=%s WHERE id=%s",
+            (nutrient, amount, post_reading, status_color, log_id)
         )
         conn.commit()
         cursor.close()

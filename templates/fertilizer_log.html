@@ -78,6 +78,8 @@
                         <tr>
                             <th>Nutrient Type</th>
                             <th>Amount Added (g)</th>
+                            <th>Post Reading (mg/kg) </th>
+                            <th>Status</th>
                             <th>Timestamp</th>
                             <th>Actions</th>
                         </tr>
@@ -87,6 +89,11 @@
                         <tr>
                             <td>{{ log.nutrient_type }}</td>
                             <td>{{ log.amount_added }}</td>
+                            <td>{{ log.post_reading}}</td>
+                            <td>
+                                <span class="status-indicator status-{{ log.status_color }}"></span>
+                                {{ log.status_color|replace('-', ' ')|title }}
+                            </td>
                             <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                             <td>
                                 <a href="{{ url_for('edit_log', log_id=log.id) }}" class="action-btn edit-btn">

@@ -6,33 +6,152 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Status color indicators */
+        .status-indicator {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        .status-red { background-color: #f44336; }
+        .status-orange { background-color: #ff9800; }
+        .status-yellow { background-color: #ffeb3b; }
+        .status-light-green { background-color: #8bc34a; }
+        .status-dark-green { background-color: #4caf50; }
+
+        /* Popup Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #f4f4f4;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 350px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            animation: modalopen 0.3s;
+        }
+
+        @keyframes modalopen {
+            from {opacity: 0; transform: translateY(-50px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+
+        .modal-header {
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .modal-body {
+            padding: 15px 0;
+        }
+
+        .modal-footer {
+            padding: 10px 0;
+            border-top: 1px solid #ddd;
+            text-align: right;
+        }
+
+        .modal-btn {
+            padding: 8px 15px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .modal-btn-confirm {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .modal-btn-cancel {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .modal-btn-confirm:hover {
+            background-color: #45a049;
+        }
+
+        .modal-btn-cancel:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Toast Notification Styles */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 4px;
+            color: white;
+            background-color: #4CAF50;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            transform: translateX(150%);
+            transition: transform 0.3s ease-in-out;
+            max-width: 300px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast i {
+            margin-right: 10px;
+        }
+
+        .toast.error {
+            background-color: #f44336;
+        }
+
+        .toast.warning {
+            background-color: #ff9800;
+        }
+    </style>
 </head>
 <body>
     <div class="sidebar">
         <img src="{{ url_for('static', filename='images/logo uitm.png') }}" alt="UITM Logo" style="width: 220px; height:auto;">
-    <a href="{{ url_for('dashboard') }}" class="nav-link">
-        <i class="fas fa-chart-bar"></i>
-        <span>DATA</span>
-    </a>
-    <a href="{{ url_for('fertilizer_log') }}" class="nav-link active">
-        <i class="fas fa-seedling"></i>
-        <span>LOG</span>
-    </a>
-    <a href="{{ url_for('about_us') }}" class="nav-link">
-        <i class="fas fa-users"></i>
-        <span>ABOUT US</span>
-    </a>
-    <a href="{{ url_for('contact') }}" class="nav-link">
-        <i class="fas fa-envelope"></i>
-        <span>CONTACT</span>
-    </a>
-</div>
+        <a href="{{ url_for('dashboard') }}" class="nav-link">
+            <i class="fas fa-chart-bar"></i>
+            <span>DATA</span>
+        </a>
+        <a href="{{ url_for('fertilizer_log') }}" class="nav-link active">
+            <i class="fas fa-seedling"></i>
+            <span>LOG</span>
+        </a>
+        <a href="{{ url_for('about_us') }}" class="nav-link">
+            <i class="fas fa-users"></i>
+            <span>ABOUT US</span>
+        </a>
+        <a href="{{ url_for('contact') }}" class="nav-link">
+            <i class="fas fa-envelope"></i>
+            <span>CONTACT</span>
+        </a>
+    </div>
 
     <div class="main-content">
         <div class="header">
             <button class="sidebar-toggle">
-        <i class="fas fa-bars"></i>
-    </button>
+                <i class="fas fa-bars"></i>
+            </button>
             <h1>SOIL FERTILITY STATUS DASHBOARD</h1>
             <div class="auth-section">
                 {% if not session.get('user_id') %}
@@ -78,7 +197,7 @@
                         <tr>
                             <th>Nutrient Type</th>
                             <th>Amount Added (g)</th>
-                            <th>Post Reading (mg/kg) </th>
+                            <th>Post Reading (mg/kg)</th>
                             <th>Status</th>
                             <th>Timestamp</th>
                             <th>Actions</th>
@@ -99,9 +218,9 @@
                                 <a href="{{ url_for('edit_log', log_id=log.id) }}" class="action-btn edit-btn">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
-                                <a href="{{ url_for('delete_log', log_id=log.id) }}" onclick="return confirm('Delete this log?');" class="action-btn delete-btn">
+                                <button onclick="confirmDelete('{{ log.id }}')" class="action-btn delete-btn">
                                     <i class="fas fa-trash-alt"></i> Delete
-                                </a>
+                                </button>
                             </td>
                         </tr>
                         {% endfor %}
@@ -142,7 +261,103 @@
     </div>
 
     <script>
+    // Function to show toast notification
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'exclamation-triangle'}"></i>
+            ${message}
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Show the toast
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+        
+        // Hide after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
+        }, 3000);
+    }
+
+    // For the delete confirmation
+    function confirmDelete(logId) {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Confirm Deletion</h3>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this log entry? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="modal-btn modal-btn-cancel">Cancel</button>
+                    <button class="modal-btn modal-btn-confirm">Delete</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
+        
+        modal.querySelector('.modal-btn-cancel').addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+        
+        modal.querySelector('.modal-btn-confirm').addEventListener('click', () => {
+    fetch(`/delete_log/${logId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = `/fertilizer_log?action=deleted`;
+        } else {
+            window.location.href = `/fertilizer_log?action=error`;
+        }
+    })
+    .catch(error => {
+        console.error('Error deleting log:', error);
+        window.location.href = `/fertilizer_log?action=error`;
+    });
+});
+
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                document.body.removeChild(modal);
+            }
+        });
+    }
+
+    // Check for URL parameters to show notifications
     document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const action = urlParams.get('action');
+        
+        if (action === 'added') {
+            showToast('Successfully added new fertilizer log!');
+        } else if (action === 'updated') {
+            showToast('Successfully updated fertilizer log!');
+        } else if (action === 'deleted') {
+            showToast('Successfully deleted fertilizer log!');
+        } else if (action === 'error') {
+            showToast('An error occurred. Please try again.', 'error');
+        }
+
+        // Sidebar toggle functionality
         const sidebar = document.querySelector('.sidebar');
         const toggleBtn = document.querySelector('.sidebar-toggle');
         
@@ -150,7 +365,7 @@
         const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
         if (isCollapsed) {
             sidebar.classList.add('collapsed');
-            toggleBtn.querySelector('i').classList.replace('fa-bars', 'fa-chevron-right');
+            tomodal.ggleBtn.querySelector('i').classList.replace('fa-bars', 'fa-chevron-right');
         }
         
         toggleBtn.addEventListener('click', function() {
@@ -168,6 +383,6 @@
             }
         });
     });
-</script>
+    </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 import mysql.connector
 from datetime import datetime
@@ -178,7 +178,7 @@ def add_log():
         cursor.close()
         conn.close()
         flash("Log added successfully!")
-        return redirect(url_for('fertilizer_log'))
+        return redirect(url_for('fertilizer_log', action='added'))
     return render_template('edit_log.html', log=None)
 
 # Edit Log
@@ -212,16 +212,19 @@ def edit_log(log_id):
         cursor.close()
         conn.close()
         flash("Log updated successfully!")
-        return redirect(url_for('fertilizer_log'))
+        return redirect(url_for('fertilizer_log', action='updated'))
+
 
     cursor.close()
     conn.close()
     return render_template('edit_log.html', log=log)
 
 # Delete Log
-@app.route('/delete_log/<int:log_id>')
+@app.route('/delete_log/<int:log_id>', methods=['POST'])
 def delete_log(log_id):
     if 'user_id' not in session:
+        if request.is_json:
+            return jsonify(success=False, error="Not logged in"), 401
         flash("Please log in to delete fertilizer logs.")
         return redirect(url_for('login'))
 
@@ -229,9 +232,11 @@ def delete_log(log_id):
     conn = mysql.connector.connect(**db_config)
     cursor = conn.cursor()
 
-    # Ensure user owns the log
     cursor.execute("SELECT * FROM fertilizer_logs WHERE id = %s AND user_id = %s", (log_id, user_id))
     if cursor.fetchone() is None:
+        conn.close()
+        if request.is_json:
+            return jsonify(success=False, error="Unauthorized"), 403
         flash("You do not have permission to delete this log.")
         return redirect(url_for('fertilizer_log'))
 
@@ -239,8 +244,13 @@ def delete_log(log_id):
     conn.commit()
     cursor.close()
     conn.close()
+
+    if request.is_json:
+        return jsonify(success=True)
+    
     flash("Log deleted successfully!")
     return redirect(url_for('fertilizer_log'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)

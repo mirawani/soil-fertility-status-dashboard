@@ -6,53 +6,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Status color indicators */
+        .status-indicator {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        .status-red { background-color: #f44336; }
+        .status-orange { background-color: #ff9800; }
+        .status-yellow { background-color: #ffeb3b; }
+        .status-light-green { background-color: #8bc34a; }
+        .status-dark-green { background-color: #4caf50; }
 
-    <!-- Add this CSS in the head section -->
-<style>
-    /* Status color indicators */
-    .status-indicator {
-        display: inline-block;
-        width: 15px;
-        height: 15px;
-        border-radius: 50%;
-        margin-right: 8px;
-        vertical-align: middle;
-    }
-    
-    .status-red { background-color: #f44336; }
-    .status-orange { background-color: #ff9800; }
-    .status-yellow { background-color: #ffeb3b; }
-    .status-light-green { background-color: #8bc34a; }
-    .status-dark-green { background-color: #4caf50; }
-</style>
+        
+        /* Toast Notification Styles */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 4px;
+            color: white;
+            background-color: #4CAF50;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            transform: translateX(150%);
+            transition: transform 0.3s ease-in-out;
+            max-width: 300px;
+        }
 
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast i {
+            margin-right: 10px;
+        }
+
+        .toast.error {
+            background-color: #f44336;
+        }
+
+        .toast.warning {
+            background-color: #ff9800;
+        }
+    </style>
 </head>
 <body>
     <div class="sidebar">
         <img src="{{ url_for('static', filename='images/logo uitm.png') }}" alt="UITM Logo" style="width: 220px; height:auto;">
-    <a href="{{ url_for('dashboard') }}" class="nav-link">
-        <i class="fas fa-chart-bar"></i>
-        <span>DATA</span>
-    </a>
-    <a href="{{ url_for('fertilizer_log') }}" class="nav-link active">
-        <i class="fas fa-seedling"></i>
-        <span>LOG</span>
-    </a>
-    <a href="{{ url_for('about_us') }}" class="nav-link">
-        <i class="fas fa-users"></i>
-        <span>ABOUT US</span>
-    </a>
-    <a href="{{ url_for('contact') }}" class="nav-link">
-        <i class="fas fa-envelope"></i>
-        <span>CONTACT</span>
-    </a>
-</div>
+        <a href="{{ url_for('dashboard') }}" class="nav-link">
+            <i class="fas fa-chart-bar"></i>
+            <span>DATA</span>
+        </a>
+        <a href="{{ url_for('fertilizer_log') }}" class="nav-link active">
+            <i class="fas fa-seedling"></i>
+            <span>LOG</span>
+        </a>
+        <a href="{{ url_for('about_us') }}" class="nav-link">
+            <i class="fas fa-users"></i>
+            <span>ABOUT US</span>
+        </a>
+        <a href="{{ url_for('contact') }}" class="nav-link">
+            <i class="fas fa-envelope"></i>
+            <span>CONTACT</span>
+        </a>
+    </div>
 
     <div class="main-content">
         <div class="header">
             <button class="sidebar-toggle">
-        <i class="fas fa-bars"></i>
-    </button>
+                <i class="fas fa-bars"></i>
+            </button>
             <h1>SOIL FERTILITY STATUS DASHBOARD</h1>
             <div class="auth-section">
                 {% if not session.get('user_id') %}
@@ -86,24 +118,23 @@
                 <div class="form-group">
                     <label for="amount">Amount Added (g):</label>
                     <input type="number" name="amount" id="amount" min="0" step="any" required value="{{ log.amount_added if log else '' }}">
-                    <div class="form-group">
-    <label for="post_reading">Post Reading :</label>
-    <input type="number" name="post_reading" id="post_reading" min="0" step="any" required 
-           value="{{ log.post_reading if log else '' }}">
-</div>
+                </div>
 
-<div class="form-group">
-    <label for="status_color">Status Color:</label>
-    <select name="status_color" id="status_color" required>
-        <option value="red" {% if log and log.status_color == 'red' %}selected{% endif %}>Red</option>
-        <option value="orange" {% if log and log.status_color == 'orange' %}selected{% endif %}>Orange</option>
-        <option value="yellow" {% if log and log.status_color == 'yellow' %}selected{% endif %}>Yellow</option>
-        <option value="light-green" {% if log and log.status_color == 'light-green' %}selected{% endif %}>Light Green</option>
-        <option value="dark-green" {% if log and log.status_color == 'dark-green' %}selected{% endif %}>Dark Green</option>
-    </select>
-</div>
+                <div class="form-group">
+                    <label for="post_reading">Post Reading (mg/kg):</label>
+                    <input type="number" name="post_reading" id="post_reading" min="0" step="any" required 
+                           value="{{ log.post_reading if log else '' }}">
+                </div>
 
-
+                <div class="form-group">
+                    <label for="status_color">Status Color:</label>
+                    <select name="status_color" id="status_color" required>
+                        <option value="red" {% if log and log.status_color == 'red' %}selected{% endif %}>Red</option>
+                        <option value="orange" {% if log and log.status_color == 'orange' %}selected{% endif %}>Orange</option>
+                        <option value="yellow" {% if log and log.status_color == 'yellow' %}selected{% endif %}>Yellow</option>
+                        <option value="light-green" {% if log and log.status_color == 'light-green' %}selected{% endif %}>Light Green</option>
+                        <option value="dark-green" {% if log and log.status_color == 'dark-green' %}selected{% endif %}>Dark Green</option>
+                    </select>
                 </div>
                 
                 <div class="form-actions">
@@ -120,7 +151,49 @@
     </div>
 
     <script>
+    // Function to show toast notification
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'exclamation-triangle'}"></i>
+            ${message}
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Show the toast
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+        
+        // Hide after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
+        }, 3000);
+    }
+
+    // Check for URL parameters to show notifications
     document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const action = urlParams.get('action');
+        
+        if (action === 'added') {
+            showToast('Successfully added new fertilizer log!');
+        } else if (action === 'updated') {
+            showToast('Successfully updated fertilizer log!');
+        } else if (action === 'deleted') {
+            showToast('Successfully deleted fertilizer log!');
+        } else if (action === 'error') {
+            showToast('An error occurred. Please try again.', 'error');
+        }
+
+        
+
+        // Sidebar toggle functionality
         const sidebar = document.querySelector('.sidebar');
         const toggleBtn = document.querySelector('.sidebar-toggle');
         
@@ -146,6 +219,6 @@
             }
         });
     });
-</script>
+    </script>
 </body>
 </html>

@@ -2,15 +2,68 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Soil Fertility Status Dashboard</title>
+    <title>My Profile - Soil Fertility Status Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+
+        .profile-value {
+            background-color: #f9f9f9;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border-left: 3px solid #4CAF50;
+            font-size: 15px;
+        }
+
+        .profile-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        /* Enhanced Edit Button */
+        .edit-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .edit-btn i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .edit-btn:hover {
+            background-color: #3e8e41;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .profile-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .profile-card {
+                padding: 20px;
+                margin: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="sidebar">
         <img src="{{ url_for('static', filename='images/logo uitm.png') }}" alt="UITM Logo" style="width: 220px; height:auto;">
-        <a href="{{ url_for('dashboard') }}" class="nav-link active">
+        <a href="{{ url_for('dashboard') }}" class="nav-link">
             <i class="fas fa-chart-bar"></i>
             <span>DATA</span>
         </a>
@@ -34,8 +87,7 @@
                 <i class="fas fa-bars"></i>
             </button>
             <h1>SOIL FERTILITY STATUS DASHBOARD</h1>
-
-            <div class="auth-section">
+           <div class="auth-section">
                 {% if not session.get('user_id') %}
                     <a href="{{ url_for('login') }}" class="login-btn"><i class="fas fa-sign-in-alt"></i> Login</a>
                 {% else %}
@@ -53,26 +105,55 @@
                 {% endif %}
             </div>
         </div> <!-- End of header -->
-
-        <div class="dashboard-content">
-            <div class="powerbi-container">
-                <iframe src="{{ embed_url }}" width="100%" height="600px" frameborder="0" allowfullscreen></iframe>
+    
+        <div class="profile-card">
+            <div class="profile-header">
+                <h2 class="profile-title">My Profile</h2>
+            </div>
+            
+            <div class="profile-content">
+                <div class="profile-field">
+                    <span class="profile-label">Username</span>
+                    <div class="profile-value">{{ user.username }}</div>
+                </div>
+                
+                <div class="profile-field">
+                    <span class="profile-label">Full Name</span>
+                    <div class="profile-value">{{ user.name }}</div>
+                </div>
+                
+                <div class="profile-field">
+                    <span class="profile-label">Email</span>
+                    <div class="profile-value">{{ user.email or 'Not provided' }}</div>
+                </div>
+                
+                <div class="profile-field">
+                    <span class="profile-label">Phone Number</span>
+                    <div class="profile-value">{{ user.phone or 'Not provided' }}</div>
+                </div>
+            </div>
+            
+            <div class="profile-actions">
+                <a href="{{ url_for('profile_edit') }}" class="edit-btn">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </a>
             </div>
         </div>
-    </div> <!-- End of main-content -->
+    </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sidebar toggle
             const sidebar = document.querySelector('.sidebar');
             const toggleBtn = document.querySelector('.sidebar-toggle');
             const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-
+            
             if (isCollapsed) {
                 sidebar.classList.add('collapsed');
                 toggleBtn.querySelector('i').classList.replace('fa-bars', 'fa-chevron-right');
             }
 
-            toggleBtn.addEventListener('click', function () {
+            toggleBtn.addEventListener('click', function() {
                 sidebar.classList.toggle('collapsed');
                 localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
 
@@ -84,17 +165,18 @@
                 }
             });
 
+            // User dropdown
             const userDropdown = document.querySelector('.user-dropdown');
             if (userDropdown) {
                 const userBtn = userDropdown.querySelector('.user-btn');
                 const dropdown = userDropdown.querySelector('.dropdown-content');
 
-                userBtn.addEventListener('click', function (e) {
+                userBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
                     dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
                 });
 
-                document.addEventListener('click', function (event) {
+                document.addEventListener('click', function(event) {
                     if (!userDropdown.contains(event.target)) {
                         dropdown.style.display = 'none';
                     }

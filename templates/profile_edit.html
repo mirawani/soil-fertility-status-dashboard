@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Profile - Soil Fertility Status Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+     
+        .profile-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+
+        .profile-input:focus {
+            border-color: #4CAF50;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+        }
+
+        .profile-input[readonly] {
+            background-color: #f9f9f9;
+            border-left: 3px solid #4CAF50;
+        }
+
+        .password-note {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .profile-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 30px;
+            gap: 15px;
+        }
+
+        .profile-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: none;
+            cursor: pointer;
+        }
+
+        .profile-btn i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .save-btn {
+            background-color: #4CAF50;
+        }
+
+        .save-btn:hover {
+            background-color: #3e8e41;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .cancel-btn {
+            background-color: #6c757d;
+        }
+
+        .cancel-btn:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        /* Toast Notification Styles */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 6px;
+            color: white;
+            background-color: #4CAF50;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            transform: translateX(150%);
+            transition: transform 0.3s ease-out;
+            max-width: 350px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            background-color: #f44336;
+        }
+
+        .toast i {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .profile-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .profile-card {
+                padding: 20px;
+                margin: 20px;
+            }
+            
+            .profile-actions {
+                flex-direction: column;
+            }
+            
+            .profile-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .toast {
+                max-width: 90%;
+                right: 5%;
+                left: 5%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <img src="{{ url_for('static', filename='images/logo uitm.png') }}" alt="UITM Logo" style="width: 220px; height:auto;">
+        <a href="{{ url_for('dashboard') }}" class="nav-link">
+            <i class="fas fa-chart-bar"></i>
+            <span>DATA</span>
+        </a>
+        <a href="{{ url_for('fertilizer_log') }}" class="nav-link">
+            <i class="fas fa-seedling"></i>
+            <span>LOG</span>
+        </a>
+        <a href="{{ url_for('about_us') }}" class="nav-link">
+            <i class="fas fa-users"></i>
+            <span>ABOUT US</span>
+        </a>
+        <a href="{{ url_for('contact') }}" class="nav-link">
+            <i class="fas fa-envelope"></i>
+            <span>CONTACT</span>
+        </a>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <button class="sidebar-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>SOIL FERTILITY STATUS DASHBOARD</h1>
+           <div class="auth-section">
+                {% if not session.get('user_id') %}
+                    <a href="{{ url_for('login') }}" class="login-btn"><i class="fas fa-sign-in-alt"></i> Login</a>
+                {% else %}
+                    <div class="user-info">
+                        <div class="user-dropdown">
+                            <button class="user-btn">
+                                <i class="fas fa-user-circle"></i> {{ session.get('name', '').title() }} ▼
+                            </button>
+                            <div class="dropdown-content">
+                                <a class="profile-link" href="/my-profile">Profile</a>
+                                <a class="logout-link" href="{{ url_for('logout') }}">Logout</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div> <!-- End of header -->
+
+        <div class="profile-card">
+            <div class="profile-header">
+                <h2 class="profile-title">Edit Profile</h2>
+            </div>
+            
+            <form method="POST" action="{{ url_for('profile_edit') }}" id="profileForm">
+                <div class="profile-content">
+                    <div class="profile-field">
+                        <label class="profile-label">Username</label>
+                        <input type="text" class="profile-input" value="{{ user.username }}" readonly>
+                    </div>
+                    
+                    <div class="profile-field">
+                        <label class="profile-label">Full Name</label>
+                        <input type="text" class="profile-input" value="{{ user.name }}" readonly>
+                    </div>
+                    
+                    <div class="profile-field">
+                        <label class="profile-label">Email</label>
+                        <input type="email" class="profile-input" name="email" value="{{ user.email or '' }}" required>
+                    </div>
+                    
+                    <div class="profile-field">
+                        <label class="profile-label">Phone Number</label>
+                        <input type="text" class="profile-input" name="phone" value="{{ user.phone or '' }}" required>
+                    </div>
+                    
+                    <div class="profile-field">
+                        <label class="profile-label">New Password</label>
+                        <input type="password" class="profile-input" name="new_password" placeholder="Leave blank to keep current password">
+                        <div class="password-note">Only enter if you want to change your password</div>
+                    </div>
+                    
+                    <div class="profile-field">
+                        <label class="profile-label">Confirm New Password</label>
+                        <input type="password" class="profile-input" name="confirm_password" placeholder="Confirm new password">
+                    </div>
+                </div>
+                
+                <div class="profile-actions">
+                    <a href="{{ url_for('my_profile') }}" class="profile-btn cancel-btn">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="profile-btn save-btn" id="saveBtn">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sidebar toggle
+            const sidebar = document.querySelector('.sidebar');
+            const toggleBtn = document.querySelector('.sidebar-toggle');
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            
+            if (isCollapsed) {
+                sidebar.classList.add('collapsed');
+                toggleBtn.querySelector('i').classList.replace('fa-bars', 'fa-chevron-right');
+            }
+
+            toggleBtn.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+
+                const icon = this.querySelector('i');
+                if (sidebar.classList.contains('collapsed')) {
+                    icon.classList.replace('fa-bars', 'fa-chevron-right');
+                } else {
+                    icon.classList.replace('fa-chevron-right', 'fa-bars');
+                }
+            });
+
+            // User dropdown
+            const userDropdown = document.querySelector('.user-dropdown');
+            if (userDropdown) {
+                const userBtn = userDropdown.querySelector('.user-btn');
+                const dropdown = userDropdown.querySelector('.dropdown-content');
+
+                userBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+                });
+
+                document.addEventListener('click', function(event) {
+                    if (!userDropdown.contains(event.target)) {
+                        dropdown.style.display = 'none';
+                    }
+                });
+            }
+
+            // Form submission with toast notification
+            const profileForm = document.getElementById('profileForm');
+            const saveBtn = document.getElementById('saveBtn');
+            
+            profileForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Disable the save button to prevent multiple submissions
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                
+                // Simulate form submission (replace with actual form submission)
+                setTimeout(() => {
+                    // In a real application, this would be your fetch/ajax call
+                    // For demonstration, we'll just show the toast
+                    
+                    // Show success toast
+                    showToast('Profile updated successfully!');
+                    
+                    // Re-enable the button
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+                    
+                    // In a real app, you would submit the form here
+                    // profileForm.submit();
+                    
+                    // For demo, we'll submit after 2 seconds
+                    setTimeout(() => {
+                        profileForm.submit();
+                    }, 2000);
+                }, 1000);
+            });
+
+            // Show toast notification function
+            function showToast(message, type = 'success') {
+                const toastContainer = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type === 'error' ? 'error' : ''}`;
+                toast.innerHTML = `
+                    <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>
+                    ${message}
+                `;
+                
+                toastContainer.appendChild(toast);
+                
+                // Show the toast
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 100);
+                
+                // Hide after 3 seconds
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 300);
+                }, 3000);
+            }
+
+            // Check for URL parameters to show notifications
+            const urlParams = new URLSearchParams(window.location.search);
+            const action = urlParams.get('action');
+            
+            if (action === 'update') {
+                showToast('Profile updated successfully!');
+            } else if (action === 'error') {
+                showToast('An error occurred. Please try again.', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

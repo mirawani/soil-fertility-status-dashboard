@@ -39,11 +39,19 @@
                     <a href="{{ url_for('login') }}" class="login-btn"><i class="fas fa-sign-in-alt"></i> Login</a>
                 {% else %}
                     <div class="user-info">
-                        <a href="{{ url_for('logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        <div class="user-dropdown">
+                            <button class="user-btn">
+                                <i class="fas fa-user-circle"></i> {{ session.get('name', '').title() }} ▼
+                            </button>
+                            <div class="dropdown-content">
+                                <a class="profile-link" href="/my-profile">Profile</a>
+                                <a class="logout-link" href="{{ url_for('logout') }}">Logout</a>
+                            </div>
+                        </div>
                     </div>
                 {% endif %}
             </div>
-        </div>
+        </div> <!-- End of header -->
     
         <div class="contact-container">
             <h2 class="section-title">Contact Us</h2>
@@ -106,6 +114,23 @@
                 icon.classList.replace('fa-chevron-right', 'fa-bars');
             }
         });
+        // User dropdown
+            const userDropdown = document.querySelector('.user-dropdown');
+            if (userDropdown) {
+                const userBtn = userDropdown.querySelector('.user-btn');
+                const dropdown = userDropdown.querySelector('.dropdown-content');
+
+                userBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+                });
+
+                document.addEventListener('click', function(event) {
+                    if (!userDropdown.contains(event.target)) {
+                        dropdown.style.display = 'none';
+                    }
+                });
+            }
     });
 </script>
 </body>

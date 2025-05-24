@@ -78,11 +78,13 @@ def login():
         if user and check_password_hash(user['password_hash'], password):
             session['user_id'] = user['user_id']
             session['username'] = user['username']
+            session['name'] = user['name']  # ✅ Store the name in session
             flash("Login successful.")
             return redirect(url_for('dashboard'))
         else:
             flash("Invalid username or password.")
     return render_template('login.html')
+
 
 # Logout
 @app.route('/logout')
@@ -90,6 +92,63 @@ def logout():
     session.clear()
     flash("You have been logged out.")
     return redirect(url_for('login'))
+
+# Profile View (read-only)
+@app.route('/my-profile')
+def my_profile():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    conn = mysql.connector.connect(**db_config)
+    cursor = conn.cursor(dictionary=True)
+    
+    cursor.execute("SELECT username, name, email, phone FROM users WHERE user_id=%s", (user_id,))
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    
+    return render_template('my_profile.html', user=user)
+
+# Profile Edit (form)
+@app.route('/edit-profile', methods=['GET', 'POST'])
+def profile_edit():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    conn = mysql.connector.connect(**db_config)
+    cursor = conn.cursor(dictionary=True)
+
+    if request.method == 'POST':
+        email = request.form['email']
+        phone = request.form['phone']
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+
+        # Validate passwords match if provided
+        if new_password:
+            if new_password != confirm_password:
+                flash("Passwords do not match.", "error")
+                return redirect(url_for('profile_edit'))
+            
+            hashed_password = generate_password_hash(new_password)
+            cursor.execute("UPDATE users SET password_hash=%s, email=%s, phone=%s WHERE user_id=%s",
+                          (hashed_password, email, phone, user_id))
+        else:
+            cursor.execute("UPDATE users SET email=%s, phone=%s WHERE user_id=%s",
+                          (email, phone, user_id))
+
+        conn.commit()
+        flash("Profile updated successfully.", "success")
+        return redirect(url_for('my_profile'))
+
+    cursor.execute("SELECT username, name, email, phone FROM users WHERE user_id=%s", (user_id,))
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    
+    return render_template('profile_edit.html', user=user)
 
 # Fertilizer Log (with pagination and search)
 @app.route('/fertilizer_log')

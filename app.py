@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 import mysql.connector
 from datetime import datetime
 
@@ -326,6 +327,235 @@ def delete_log(log_id):
     
     flash("Log deleted successfully!")
     return redirect(url_for('fertilizer_log'))
+
+#admin registration
+@app.route('/admin/register', methods=['GET', 'POST'])
+def admin_register():
+    if request.method == 'POST':
+        name = request.form['name']
+        username = request.form['username']
+        password = request.form['password']
+        password_hash = generate_password_hash(password)
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO admins (name, username, password_hash)
+            VALUES (%s, %s, %s)
+        ''', (name, username, password_hash))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        flash('Admin account created. You can now login.', 'success')
+        return redirect(url_for('admin_login'))
+
+    return render_template('admin/admin_register.html')
+
+
+#admin login
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM admins WHERE username = %s", (username,))
+        admin = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if admin and check_password_hash(admin['password_hash'], password):
+            session['user_id'] = admin['admin_id']
+            session['username'] = admin['username']
+            session['is_admin'] = True
+            flash('Welcome, admin!', 'success')
+            return redirect(url_for('admin_dashboard'))
+        else:
+            flash('Invalid admin credentials', 'danger')
+
+    return render_template('admin/admin_login.html')
+
+
+#logout
+@app.route('/admin/logout')
+def admin_logout():
+    session.pop('admin_id', None)
+    session.pop('admin_username', None)
+    flash('Admin logged out successfully.')
+    return redirect(url_for('admin_login'))
+
+# ------------------ Admin Access Decorator ------------------
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session or not session.get('is_admin'):
+            flash("Admin access only", "danger")
+            return redirect(url_for('admin_login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# ------------------ Admin Dashboard ------------------
+@app.route('/admin')
+@admin_required
+def admin_dashboard():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) FROM users")
+    total_users = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM admins")
+    total_admins = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM fertilizer_logs")
+    total_logs = cursor.fetchone()[0]
+
+    cursor.close()
+    conn.close()
+
+    return render_template('admin/admin_dashboard.html', total_users=total_users, total_admins=total_admins, total_logs=total_logs)
+
+# View all admins (admin)
+@app.route('/admin/admins')
+@admin_required
+def view_admins():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT * FROM users WHERE is_admin = 1")
+    admins = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template('admin/view_admins.html', admins=admins)
+
+# View all regular users (admin)
+@app.route('/admin/users')
+@admin_required
+def view_users():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT * FROM users WHERE is_admin = 0")
+    users = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template('admin/view_users.html', users=users)
+
+# Edit user (admin)
+@app.route('/admin/users/edit/<int:user_id>', methods=['GET', 'POST'])
+@admin_required
+def edit_user(user_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    if request.method == 'POST':
+        username = request.form['username']
+        is_admin = int(request.form.get('is_admin', 0))
+        cursor.execute("UPDATE users SET username=%s, is_admin=%s WHERE UserID=%s", (username, is_admin, user_id))
+        conn.commit()
+        flash('User updated successfully', 'success')
+        cursor.close()
+        conn.close()
+        # Redirect to appropriate page after update
+        if is_admin:
+            return redirect(url_for('view_admins'))
+        else:
+            return redirect(url_for('view_users'))
+    else:
+        cursor.execute("SELECT * FROM users WHERE UserID=%s", (user_id,))
+        user = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return render_template('admin/edit_user.html', user=user)
+
+# Delete user (admin)
+@app.route('/admin/users/delete/<int:user_id>')
+@admin_required
+def delete_user(user_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT is_admin FROM users WHERE UserID=%s", (user_id,))
+    user = cursor.fetchone()
+    
+    cursor.execute("DELETE FROM users WHERE UserID = %s", (user_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    flash('User deleted successfully', 'success')
+
+    # Redirect depending on the deleted user type
+    if user and user['is_admin']:
+        return redirect(url_for('view_admins'))
+    else:
+        return redirect(url_for('view_users'))
+
+
+# View all fertilizer logs (admin)
+@app.route('/admin/logs')
+@admin_required
+def view_all_logs():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT l.id, u.username, u.name, l.nutrient_type, l.amount_added, l.post_reading, l.status_color, l.timestamp
+        FROM fertilizer_logs l
+        JOIN users u ON l.user_id = u.user_id
+    """)
+    logs = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return render_template('admin/view_logs.html', logs=logs)
+
+
+# Edit fertilizer log (admin)
+@app.route('/admin/logs/edit/<int:log_id>', methods=['GET', 'POST'])
+@admin_required
+def edit_log_admin(log_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    if request.method == 'POST':
+        nutrient_type = request.form['nutrient_type']
+        amount_added = request.form['amount_added']
+        post_reading = request.form['post_reading']
+        status_color = request.form['status_color']
+
+        cursor.execute("""
+            UPDATE fertilizer_logs 
+            SET nutrient_type=%s, amount_added=%s, post_reading=%s, status_color=%s 
+            WHERE id=%s
+        """, (nutrient_type, amount_added, post_reading, status_color, log_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        flash('Log updated successfully', 'success')
+        return redirect(url_for('view_all_logs'))
+    else:
+        cursor.execute("SELECT * FROM fertilizer_logs WHERE id=%s", (log_id,))
+        log = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return render_template('admin/edit_log.html', log=log)
+
+
+# Delete fertilizer log (admin)
+@app.route('/admin/logs/delete/<int:log_id>')
+@admin_required
+def delete_log_admin(log_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM fertilizer_logs WHERE id=%s", (log_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    flash('Log deleted successfully', 'success')
+    return redirect(url_for('view_all_logs'))
+
 
 
 if __name__ == '__main__':

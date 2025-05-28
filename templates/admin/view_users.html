@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9, #a5d6a7, #81c784);
+            min-height: 100vh;
+        }
+        
+        /* ----- Sidebar (Same as Dashboard) ----- */
+        .sidebar {
+            width: 240px;
+            background: rgba(255, 255, 255, 0.85);
+            height: 100vh;
+            position: fixed;
+            padding: 25px 0;
+            backdrop-filter: blur(8px);
+            border-right: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 25px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .sidebar-header h2 {
+            color: #2e7d32;
+            font-weight: 600;
+            font-size: 1.4rem;
+        }
+        
+        .nav-menu {
+            margin-top: 25px;
+        }
+        
+        .nav-item {
+            padding: 14px 25px;
+            transition: all 0.2s;
+            margin: 5px 10px;
+            border-radius: 8px;
+        }
+        
+        .nav-item:hover {
+            background: rgba(76, 175, 80, 0.1);
+        }
+        
+        .nav-item.active {
+            background: rgba(76, 175, 80, 0.15);
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .nav-item a {
+            color: #2e7d32;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        /* ----- Main Content ----- */
+        .main-content {
+            margin-left: 240px;
+            width: calc(100% - 240px);
+            padding: 35px 45px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+        }
+        
+        .header h1 {
+            color: #1b5e20;
+            font-weight: 600;
+            font-size: 1.9rem;
+        }
+        
+        .logout-btn {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(211, 47, 47, 0.2);
+        }
+        
+        /* ----- User Tables ----- */
+        .section {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(6px);
+        }
+        
+        .section h2 {
+            color: #2e7d32;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(46, 125, 50, 0.2);
+        }
+        
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .user-table th {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .user-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .user-table tr:hover {
+            background-color: rgba(76, 175, 80, 0.05);
+        }
+        
+        .action-link {
+            color: #2e7d32;
+            text-decoration: none;
+            margin-right: 15px;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .action-link.edit {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+        
+        .action-link.delete {
+            background-color: rgba(211, 47, 47, 0.1);
+            color: #d32f2f;
+        }
+        
+        .action-link:hover {
+            transform: translateY(-2px);
+        }
+        
+        .action-link.edit:hover {
+            background-color: rgba(76, 175, 80, 0.2);
+        }
+        
+        .action-link.delete:hover {
+            background-color: rgba(211, 47, 47, 0.2);
+        }
+        
+        /* Badge for admin status */
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .badge.admin {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .badge.user {
+            background-color: #e0e0e0;
+            color: #616161;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>Admin</h2>
+        </div>
+        <div class="nav-menu">
+            <div class="nav-item">
+                <a href="{{ url_for('admin_dashboard') }}"> Dashboard</a>
+            </div>
+            <div class="nav-item active">
+                <a href="{{ url_for('view_users') }}"> Manage Users</a>
+            </div>
+            <div class="nav-item">
+                <a href="{{ url_for('view_admins') }}"> Manage Admins</a>
+            </div>
+            <div class="nav-item">
+                <a href="{{ url_for('view_all_logs') }}"> Manage Logs</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1>User Management</h1>
+            <button class="logout-btn" onclick="window.location.href='{{ url_for('admin_logout') }}'">Logout</button>
+        </div>
+        
+        <!-- Regular Users Section -->
+        <div class="section">
+            <h2>Users</h2>
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.user_id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>
+                            <span class="badge {% if user.is_admin %}admin{% else %}user{% endif %}">
+                                {% if user.is_admin %}Admin{% else %}User{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('edit_user', user_id=user.user_id) }}" class="action-link edit">Edit</a>
+                            <a href="{{ url_for('delete_user', user_id=user.user_id) }}" class="action-link delete">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

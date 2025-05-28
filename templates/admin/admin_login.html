@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #28a745;
+            --primary-dark: #218838;
+            --primary-light: #5cb85c;
+            --primary-bg: #f0fdf4;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+            box-sizing: border-box;
+        }
+        
+        .auth-logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+        
+        .auth-logo img {
+            max-width: 180px;
+            height: auto;
+        }
+        
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+            font-size: 26px;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #495057;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 16px 12px 42px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.2s;
+            background-color: #f8f9fa;
+            box-sizing: border-box;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
+            background-color: white;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 24px;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .register-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .register-link a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 38px;
+            color: #adb5bd;
+            font-size: 16px;
+        }
+        
+        .form-group:focus-within .input-icon {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="auth-logo">
+            <img src="{{ url_for('static', filename='images/logo uitm.png') }}" alt="UITM Logo">
+        </div>
+        
+        <h2>Admin Login</h2>
+        
+        <form method="POST" action="{{ url_for('admin_login') }}">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" id="username" name="username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <i class="fas fa-lock input-icon"></i>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <button type="submit">
+                <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i>
+                Login
+            </button>
+        </form>
+        
+        <div class="register-link">
+            Don't have an account? <a href="{{ url_for('admin_register') }}">Register here</a>
+        </div>
+    </div>
+</body>
+</html>

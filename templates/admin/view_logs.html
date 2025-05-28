@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fertilizer Logs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9, #a5d6a7, #81c784);
+            min-height: 100vh;
+        }
+        
+        /* ----- Sidebar (Same as Dashboard) ----- */
+        .sidebar {
+            width: 240px;
+            background: rgba(255, 255, 255, 0.85);
+            height: 100vh;
+            position: fixed;
+            padding: 25px 0;
+            backdrop-filter: blur(8px);
+            border-right: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 25px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .sidebar-header h2 {
+            color: #2e7d32;
+            font-weight: 600;
+            font-size: 1.4rem;
+        }
+        
+        .nav-menu {
+            margin-top: 25px;
+        }
+        
+        .nav-item {
+            padding: 14px 25px;
+            transition: all 0.2s;
+            margin: 5px 10px;
+            border-radius: 8px;
+        }
+        
+        .nav-item:hover {
+            background: rgba(76, 175, 80, 0.1);
+        }
+        
+        .nav-item.active {
+            background: rgba(76, 175, 80, 0.15);
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .nav-item a {
+            color: #2e7d32;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        /* ----- Main Content ----- */
+        .main-content {
+            margin-left: 240px;
+            width: calc(100% - 240px);
+            padding: 35px 45px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+        }
+        
+        .header h1 {
+            color: #1b5e20;
+            font-weight: 600;
+            font-size: 1.9rem;
+        }
+        
+        .logout-btn {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(211, 47, 47, 0.2);
+        }
+        
+        /* ----- Logs Table ----- */
+        .logs-section {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(6px);
+        }
+        
+        .logs-section h2 {
+            color: #2e7d32;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(46, 125, 50, 0.2);
+        }
+        
+        .logs-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .logs-table th {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .logs-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .logs-table tr:hover {
+            background-color: rgba(76, 175, 80, 0.05);
+        }
+        
+        /* Enhanced Action Buttons */
+        .action-btn-group {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 12px;
+            border-radius: 18px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .action-btn.edit {
+            background-color: #4CAF50;
+            color: white;
+            border: 1px solid #43A047;
+        }
+        
+        .action-btn.delete {
+            background-color: #f5f5f5;
+            color: #d32f2f;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .action-btn.edit:hover {
+            background-color: #43A047;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
+        }
+        
+        .action-btn.delete:hover {
+            background-color: #ffebee;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(211, 47, 47, 0.1);
+        }
+        
+        /* Nutrient type badges */
+        .nutrient-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background-color: #81c784;
+            color: white;
+        }
+        
+        .status-badge {
+            background-color: #a5d6a7;
+        }
+        
+        /* Timestamp styling */
+        .timestamp {
+            color: #616161;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>Admin</h2>
+        </div>
+        <div class="nav-menu">
+            <div class="nav-item">
+                <a href="{{ url_for('admin_dashboard') }}"> Dashboard</a>
+            </div>
+            <div class="nav-item">
+                <a href="{{ url_for('view_users') }}"> Manage Users</a>
+            </div>
+            <div class="nav-item">
+                <a href="{{ url_for('view_admins') }}"> Manage Admins</a>
+            </div>
+            <div class="nav-item active">
+                <a href="{{ url_for('view_all_logs') }}"> Manage Logs</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1>Fertilizer Logs</h1>
+            <button class="logout-btn" onclick="window.location.href='{{ url_for('admin_logout') }}'">Logout</button>
+        </div>
+        
+        <!-- Logs Section -->
+        <div class="logs-section">
+            <h2>Logs</h2>
+            <table class="logs-table">
+                <thead>
+                    <tr>
+                        <th>Log ID</th>
+                        <th>Username</th>
+                        <th>Name</th>
+                        <th>Nutrient Type</th>
+                        <th>Amount (g)</th>
+                        <th>Post Reading</th>
+                        <th>Status</th>
+                        <th>Timestamp</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>{{ log.id }}</td>
+                        <td>{{ log.username }}</td>
+                        <td>{{ log.name }}</td>
+                        <td>{{ log.nutrient_type }}</td>
+                        <td>{{ log.amount_added }}</td>
+                        <td>{{ log.post_reading if log.post_reading else 'None' }}</td>
+                        <td><span class="nutrient-badge" style="background-color: {{ log.status_color or '#ccc' }};">{{ log.status_color or 'N/A' }}</span></td>                        
+                        <td class="timestamp">{{ log.timestamp }}</td>
+                        <td>
+                            <div class="action-btn-group">
+                                <a href="{{ url_for('edit_log_admin', log_id=log.id) }}" class="action-btn edit">Edit</a>
+                                <a href="{{ url_for('delete_log_admin', log_id=log.id) }}" class="action-btn delete">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

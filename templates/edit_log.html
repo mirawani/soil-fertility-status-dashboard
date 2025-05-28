@@ -115,8 +115,8 @@
             
             <form method="post" class="log-form">
                 <div class="form-group">
-                    <label for="nutrient">Nutrient Type:</label>
-                    <select name="nutrient" id="nutrient" required>
+                    <label for="nutrient_type">Nutrient Type:</label>
+                    <select name="nutrient_type" id="nutrient_type" required>
                         <option value="Nitrogen" {% if log and log.nutrient_type == 'Nitrogen' %}selected{% endif %}>Nitrogen</option>
                         <option value="Phosphorus" {% if log and log.nutrient_type == 'Phosphorus' %}selected{% endif %}>Phosphorus</option>
                         <option value="Potassium" {% if log and log.nutrient_type == 'Potassium' %}selected{% endif %}>Potassium</option>
@@ -124,13 +124,13 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="amount">Amount Added (g):</label>
-                    <input type="number" name="amount" id="amount" min="0" step="any" required value="{{ log.amount_added if log else '' }}">
+                    <label for="amount_added">Amount Added (g):</label>
+                    <input type="number" name="amount_added" id="amount_added" min="0" step="any" required value="{{ log.amount_added if log else '' }}">
                 </div>
 
                 <div class="form-group">
                     <label for="post_reading">Post Reading (mg/kg):</label>
-                    <input type="number" name="post_reading" id="post_reading" min="0" step="any" required 
+                    <input type="number" name="post_reading" id="post_reading" min="0" step="any" 
                            value="{{ log.post_reading if log else '' }}">
                 </div>
 

@@ -16,6 +16,10 @@ db_config = {
     'database': 'soil_fertility'
 }
 
+def get_db_connection():
+    return mysql.connector.connect(**db_config)
+
+
 # Home Dashboard
 @app.route('/')
 def dashboard():
@@ -227,26 +231,32 @@ def fertilizer_log():
 # In the add_log route
 @app.route('/add_log', methods=['GET', 'POST'])
 def add_log():
-    if request.method == 'POST':
-        nutrient = request.form['nutrient'] 
-        amount = request.form['amount']      
-        post_reading = request.form['post_reading']  
-        status_color = request.form['status_color']  
+    if 'user_id' not in session:
+        return redirect('/login')
 
+    if request.method == 'POST':
         user_id = session['user_id']
-        conn = mysql.connector.connect(**db_config)
+        nutrient_type = request.form.get('nutrient_type')
+        amount_added = request.form.get('amount_added')
+        post_reading = request.form.get('post_reading') or None
+        status_color = request.form.get('status_color')
+        timestamp = datetime.now()
+
+        conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO fertilizer_logs (nutrient_type, amount_added, post_reading, status_color, user_id) VALUES (%s, %s, %s, %s, %s)",
-            (nutrient, amount, post_reading, status_color, user_id)
-        )
+
+        cursor.execute("""
+            INSERT INTO fertilizer_logs (user_id, nutrient_type, amount_added, post_reading, status_color,timestamp)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (user_id, nutrient_type, amount_added, post_reading, status_color, timestamp))
+
         conn.commit()
         cursor.close()
         conn.close()
-        flash("Log added successfully!")
-        return redirect(url_for('fertilizer_log', action='added'))
-    return render_template('edit_log.html', log=None)
 
+        return redirect('/fertilizer_log')
+
+    return render_template('edit_log.html')
 # Edit Log
 @app.route('/edit_log/<int:log_id>', methods=['GET', 'POST'])
 def edit_log(log_id):
@@ -266,13 +276,13 @@ def edit_log(log_id):
         return redirect(url_for('fertilizer_log'))
 
     if request.method == 'POST':
-        nutrient = request.form['nutrient']
-        amount = request.form['amount']
+        nutrient_type = request.form['nutrient_type']
+        amount_added = request.form['amount_added']
         post_reading = request.form['post_reading']
         status_color = request.form['status_color']
         cursor.execute(
             "UPDATE fertilizer_logs SET nutrient_type=%s, amount_added=%s, post_reading=%s, status_color=%s WHERE id=%s",
-            (nutrient, amount, post_reading, status_color, log_id)
+            (nutrient_type, amount_added, post_reading, status_color, log_id)
         )
         conn.commit()
         cursor.close()
@@ -280,10 +290,10 @@ def edit_log(log_id):
         flash("Log updated successfully!")
         return redirect(url_for('fertilizer_log', action='updated'))
 
-
     cursor.close()
     conn.close()
     return render_template('edit_log.html', log=log)
+
 
 # Delete Log
 @app.route('/delete_log/<int:log_id>', methods=['POST'])

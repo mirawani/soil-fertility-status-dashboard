@@ -160,6 +160,7 @@ def fertilizer_log():
     user_id = session['user_id']
     page = request.args.get('page', 1, type=int)
     search_date = request.args.get('search_date', '')
+    nutrient_filter = request.args.get('nutrient_type', '')
 
     conn = mysql.connector.connect(**db_config)
     cursor = conn.cursor(dictionary=True)
@@ -171,20 +172,25 @@ def fertilizer_log():
     # Add date filter if provided
     if search_date:
         try:
-            # Validate date format
-            datetime.strptime(search_date, '%Y-%m-%d')
+            datetime.strptime(search_date, '%Y-%m-%d')  # Validate date format
             query += " AND DATE(timestamp) = %s"
             params.append(search_date)
         except ValueError:
             flash("Invalid date format. Please use YYYY-MM-DD.")
             return redirect(url_for('fertilizer_log'))
 
-    # Count total records for pagination
+    # Add nutrient type filter if provided
+    if nutrient_filter:
+        query += " AND nutrient_type = %s"
+        params.append(nutrient_filter)
+
+    # Count query for pagination
     count_query = "SELECT COUNT(*) as total FROM fertilizer_logs WHERE user_id = %s"
     count_params = [user_id]
-    if search_date:
-        count_query += " AND DATE(timestamp) = %s"
-        count_params.append(search_date)
+
+    if nutrient_filter:
+        count_query += " AND nutrient_type = %s"
+        count_params.append(nutrient_filter)
 
     cursor.execute(count_query, count_params)
     total = cursor.fetchone()['total']
@@ -213,7 +219,8 @@ def fertilizer_log():
             'next_num': page + 1,
             'iter_pages': lambda: range(1, total_pages + 1)
         },
-        search_date=search_date
+        search_date=search_date,
+        nutrient_filter=nutrient_filter
     )
 
 # Add New Log

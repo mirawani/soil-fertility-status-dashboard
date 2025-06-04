@@ -151,6 +151,21 @@
             box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
         }
         
+        /* Style for color options in dropdown */
+        .color-option {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+        }
+        
+        .color-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+        }
+        
         .btn-group {
             display: flex;
             gap: 15px;
@@ -258,8 +273,39 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="status_color">Status</label>
-                    <input type="text" name="status_color" id="status_color" value="{{ log.status_color or '' }}">
+                    <label for="status_color">Status Color</label>
+                    <select name="status_color" id="status_color" required>
+                        <option value="red" {% if log.status_color == 'red' %}selected{% endif %}>
+                            <div class="color-option">
+                                <span class="color-box" style="background-color: #ff0000;"></span>
+                                Red
+                            </div>
+                        </option>
+                        <option value="yellow" {% if log.status_color == 'yellow' %}selected{% endif %}>
+                            <div class="color-option">
+                                <span class="color-box" style="background-color: #ffff00;"></span>
+                                Yellow
+                            </div>
+                        </option>
+                        <option value="orange" {% if log.status_color == 'orange' %}selected{% endif %}>
+                            <div class="color-option">
+                                <span class="color-box" style="background-color: #ffa500;"></span>
+                                Orange
+                            </div>
+                        </option>
+                        <option value="light_green" {% if log.status_color == 'light_green' %}selected{% endif %}>
+                            <div class="color-option">
+                                <span class="color-box" style="background-color: #90ee90;"></span>
+                                Light Green
+                            </div>
+                        </option>
+                        <option value="dark_green" {% if log.status_color == 'dark_green' %}selected{% endif %}>
+                            <div class="color-option">
+                                <span class="color-box" style="background-color: #006400;"></span>
+                                Dark Green
+                            </div>
+                        </option>
+                    </select>
                 </div>
 
                 <div class="btn-group">
@@ -269,5 +315,114 @@
             </form>
         </div>
     </div>
+
+    <script>
+        // Function to update the select dropdown to show colors
+        function updateSelectWithColors() {
+            const select = document.getElementById('status_color');
+            const options = select.options;
+            
+            // Create a hidden select for form submission
+            const hiddenSelect = document.createElement('select');
+            hiddenSelect.name = 'status_color';
+            hiddenSelect.style.display = 'none';
+            
+            // Create a visible div to show the styled options
+            const colorSelect = document.createElement('div');
+            colorSelect.className = 'color-select';
+            colorSelect.style.position = 'relative';
+            
+            // Create the display element
+            const display = document.createElement('div');
+            display.className = 'color-selected';
+            display.style.padding = '12px 15px';
+            display.style.border = '1px solid rgba(0, 0, 0, 0.1)';
+            display.style.borderRadius = '8px';
+            display.style.cursor = 'pointer';
+            display.style.display = 'flex';
+            display.style.alignItems = 'center';
+            
+            // Set initial display value
+            const selectedOption = options[select.selectedIndex];
+            display.innerHTML = `
+                <span class="color-box" style="background-color: ${getColorValue(selectedOption.value)}; margin-right: 10px;"></span>
+                ${selectedOption.textContent.trim()}
+            `;
+            
+            // Create dropdown options
+            const dropdown = document.createElement('div');
+            dropdown.className = 'color-options';
+            dropdown.style.display = 'none';
+            dropdown.style.position = 'absolute';
+            dropdown.style.top = '100%';
+            dropdown.style.left = '0';
+            dropdown.style.width = '100%';
+            dropdown.style.backgroundColor = 'white';
+            dropdown.style.border = '1px solid rgba(0, 0, 0, 0.1)';
+            dropdown.style.borderRadius = '8px';
+            dropdown.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+            dropdown.style.zIndex = '100';
+            
+            // Add options to dropdown
+            for (let i = 0; i < options.length; i++) {
+                const option = options[i];
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'color-option';
+                optionDiv.style.padding = '10px 15px';
+                optionDiv.style.cursor = 'pointer';
+                optionDiv.style.display = 'flex';
+                optionDiv.style.alignItems = 'center';
+                optionDiv.innerHTML = `
+                    <span class="color-box" style="background-color: ${getColorValue(option.value)}; margin-right: 10px;"></span>
+                    ${option.textContent.trim()}
+                `;
+                
+                optionDiv.addEventListener('click', () => {
+                    select.selectedIndex = i;
+                    hiddenSelect.value = option.value;
+                    display.innerHTML = `
+                        <span class="color-box" style="background-color: ${getColorValue(option.value)}; margin-right: 10px;"></span>
+                        ${option.textContent.trim()}
+                    `;
+                    dropdown.style.display = 'none';
+                });
+                
+                dropdown.appendChild(optionDiv);
+            }
+            
+            // Toggle dropdown on display click
+            display.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', () => {
+                dropdown.style.display = 'none';
+            });
+            
+            // Add elements to DOM
+            colorSelect.appendChild(display);
+            colorSelect.appendChild(dropdown);
+            select.parentNode.insertBefore(hiddenSelect, select);
+            select.parentNode.insertBefore(colorSelect, select);
+            select.style.display = 'none';
+        }
+        
+        // Helper function to get color values
+        function getColorValue(colorName) {
+            const colors = {
+                'red': '#ff0000',
+                'yellow': '#ffff00',
+                'orange': '#ffa500',
+                'light_green': '#90ee90',
+                'dark_green': '#006400'
+            };
+            return colors[colorName] || '#cccccc';
+        }
+        
+        // Initialize the custom select when DOM is loaded
+        document.addEventListener('DOMContentLoaded', updateSelectWithColors);
+    </script>
 </body>
 </html>

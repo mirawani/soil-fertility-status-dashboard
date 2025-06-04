@@ -223,17 +223,13 @@
 
         /* Notification Styles */
         .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 1000;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            color: var(--white);
+            background-color: var(--primary-light);
             opacity: 0;
-            transition: opacity 0.5s;
+            transition: opacity 0.5s ease;
         }
 
         .notification.success {

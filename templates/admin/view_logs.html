@@ -427,6 +427,33 @@
         .text-muted {
             color: var(--text-light);
         }
+
+        .nutrient-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: white;
+    text-align: center;
+    min-width: 60px;
+}
+
+.status-red {
+    background-color: var(--error-color);
+}
+
+.status-green {
+    background-color: var(--success-color);
+}
+
+.status-yellow {
+    background-color: var(--warning-color);
+}
+
+.status-neutral {
+    background-color: var(--text-light);
+}
     </style>
 </head>
 <body>
@@ -506,16 +533,18 @@
                         <td>{{ log.amount_added }}</td>
                         <td>{{ log.post_reading if log.post_reading else 'None' }}</td>
                         <td>
-                            {% if log.status == 'Red' %}
-                                <span class="nutrient-badge status-red">Red</span>
-                            {% elif log.status == 'Green' %}
-                                <span class="nutrient-badge status-green">Green</span>
-                            {% elif log.status == 'Yellow' %}
-                                <span class="nutrient-badge status-yellow">Yellow</span>
-                            {% else %}
-                                <span class="nutrient-badge status-neutral">{{ log.status if log.status else 'N/A' }}</span>
-                            {% endif %}
-                        </td>
+    {% set status_lower = log.status_color.lower() if log.status_color else '' %}
+    {% if status_lower == 'red' %}
+        <span class="nutrient-badge status-red">Red</span>
+    {% elif status_lower == 'green' %}
+        <span class="nutrient-badge status-green">Green</span>
+    {% elif status_lower == 'yellow' %}
+        <span class="nutrient-badge status-yellow">Yellow</span>
+    {% else %}
+        <span class="nutrient-badge status-neutral">{{ log.status_color if log.status_color else 'N/A' }}</span>
+    {% endif %}
+</td>
+
                         <td class="timestamp">{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                         <td>
                             <a href="{{ url_for('edit_log_admin', log_id=log.id) }}" class="action-link edit">Edit</a>

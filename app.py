@@ -697,7 +697,6 @@ def edit_user(user_id):
     conn.close()
     return render_template('admin/edit_user.html', user=user)
 
-
 #view logs(admin)
 @app.route('/admin/logs')
 @admin_required
@@ -749,7 +748,7 @@ def view_all_logs():
     per_page = 10
     offset = (page - 1) * per_page
 
-    # Get separate search inputs
+    # Get search parameters
     search_query = request.args.get('search', '').strip()
     date_query = request.args.get('date', '').strip()
 
@@ -757,13 +756,17 @@ def view_all_logs():
     values = []
 
     if search_query:
-        conditions.append("u.username LIKE %s")
-        values.append(f"%{search_query}%")
+        conditions.append("(u.username LIKE %s OR u.name LIKE %s)")
+        values.extend([f"%{search_query}%", f"%{search_query}%"])
 
     if date_query:
-        # Validate date format if necessary (optional)
-        conditions.append("DATE(l.timestamp) = %s")
-        values.append(date_query)
+        try:
+            # Validate date format (YYYY-MM-DD)
+            datetime.strptime(date_query, '%Y-%m-%d')
+            conditions.append("DATE(l.timestamp) = %s")
+            values.append(date_query)
+        except ValueError:
+            flash('Invalid date format. Please use YYYY-MM-DD.', 'error')
 
     where_clause = "WHERE " + " AND ".join(conditions) if conditions else ""
 
@@ -777,9 +780,17 @@ def view_all_logs():
     cursor.execute(count_query, values)
     total_logs = cursor.fetchone()['total']
 
-    # Fetch paginated log data
+    # Fetch paginated log data with all required fields
     data_query = f"""
-        SELECT l.id, u.username, l.nutrient_type, l.amount_added, l.timestamp
+        SELECT 
+            l.id, 
+            u.username, 
+            u.name,
+            l.nutrient_type, 
+            l.amount_added, 
+            l.post_reading,
+            l.status_color,
+            l.timestamp
         FROM fertilizer_logs l
         JOIN users u ON l.user_id = u.user_id
         {where_clause}

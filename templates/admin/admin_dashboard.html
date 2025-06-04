@@ -174,6 +174,28 @@
             transform: translateY(-3px);
             box-shadow: 0 6px 18px rgba(76, 175, 80, 0.35);
         }
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .notification.success {
+            background-color: #4CAF50;
+        }
+
+        .notification.error {
+            background-color: #d32f2f;
+        }
     </style>
 </head>
 <body>
@@ -204,7 +226,14 @@
             <h1>Dashboard Overview</h1>
             <button class="logout-btn" onclick="window.location.href='{{ url_for('admin_logout') }}'">Logout</button>
         </div>
-        
+        <!-- Notification Area -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="notification {{ category }}" id="flash-message">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
         <!-- Stats Cards -->
 <div class="cards-grid">
     <div class="card">
@@ -222,5 +251,18 @@
 </div>
         
     </div>
+
+     <script>
+        // Notification fade-in/out
+        window.onload = () => {
+            document.querySelectorAll('#flash-message').forEach(notification => {
+                notification.style.opacity = '1';
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    setTimeout(() => notification.remove(), 500);
+                }, 3000);
+            });
+        };
+</script>
 </body>
 </html>

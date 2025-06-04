@@ -288,7 +288,7 @@ def edit_log(log_id):
         conn.commit()
         cursor.close()
         conn.close()
-        flash("Log updated successfully!")
+        flash("Log updated successfully")
         return redirect(url_for('fertilizer_log', action='updated'))
 
     cursor.close()
@@ -325,7 +325,7 @@ def delete_log(log_id):
     if request.is_json:
         return jsonify(success=True)
     
-    flash("Log deleted successfully!")
+    flash("Log deleted successfully")
     return redirect(url_for('fertilizer_log'))
 
 #admin registration
@@ -371,7 +371,7 @@ def admin_login():
             session['user_id'] = admin['admin_id']
             session['username'] = admin['username']
             session['is_admin'] = True
-            flash('Welcome, admin!', 'success')
+            flash('Welcome, admin', 'success')
             return redirect(url_for('admin_dashboard'))
         else:
             flash('Invalid admin credentials', 'danger')
@@ -384,7 +384,6 @@ def admin_login():
 def admin_logout():
     session.pop('admin_id', None)
     session.pop('admin_username', None)
-    flash('Admin logged out successfully.')
     return redirect(url_for('admin_login'))
 
 # ------------------ Admin Access Decorator ------------------

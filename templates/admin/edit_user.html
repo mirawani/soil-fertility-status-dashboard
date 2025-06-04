@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Fertilizer Logs</title>
+    <title>Edit User</title>
     <style>
         * {
             margin: 0;
@@ -100,106 +100,108 @@
             box-shadow: 0 2px 8px rgba(211, 47, 47, 0.2);
         }
         
-        /* ----- Logs Table ----- */
-        .logs-section {
+        /* ----- Edit User Form ----- */
+        .section {
             background: rgba(255, 255, 255, 0.85);
             border-radius: 12px;
             padding: 25px;
+            margin-bottom: 30px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
             backdrop-filter: blur(6px);
         }
         
-        .logs-section h2 {
+        .section h2 {
             color: #2e7d32;
             margin-bottom: 20px;
             padding-bottom: 10px;
             border-bottom: 1px solid rgba(46, 125, 50, 0.2);
         }
         
-        .logs-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
+        .form-group {
+            margin-bottom: 20px;
         }
         
-        .logs-table th {
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px;
-            text-align: left;
-        }
-        
-        .logs-table td {
-            padding: 12px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
-        
-        .logs-table tr:hover {
-            background-color: rgba(76, 175, 80, 0.05);
-        }
-        
-        /* Enhanced Action Buttons */
-        .action-btn-group {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .action-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 6px 12px;
-            border-radius: 18px;
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2e7d32;
             font-weight: 500;
-            font-size: 0.85rem;
-            text-decoration: none;
-            transition: all 0.2s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
-        .action-btn.edit {
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+        }
+        
+        .checkbox-group input {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .checkbox-group label {
+            margin-bottom: 0;
+            color: #2e7d32;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-size: 1rem;
+        }
+        
+        .btn-save {
             background-color: #4CAF50;
             color: white;
-            border: 1px solid #43A047;
         }
         
-        .action-btn.delete {
-            background-color: #f5f5f5;
+        .btn-save:hover {
+            background-color: #3d8b40;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn-cancel {
+            background-color: white;
             color: #d32f2f;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #d32f2f;
         }
         
-        .action-btn.edit:hover {
-            background-color: #43A047;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
-        }
-        
-        .action-btn.delete:hover {
-            background-color: #ffebee;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(211, 47, 47, 0.1);
-        }
-        
-        /* Nutrient type badges */
-        .nutrient-badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            background-color: #81c784;
+        .btn-cancel:hover {
+            background-color: #d32f2f;
             color: white;
-        }
-        
-        .status-badge {
-            background-color: #a5d6a7;
-        }
-        
-        /* Timestamp styling */
-        .timestamp {
-            color: #616161;
-            font-size: 0.9rem;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(211, 47, 47, 0.3);
         }
     </style>
 </head>
@@ -213,13 +215,13 @@
             <div class="nav-item">
                 <a href="{{ url_for('admin_dashboard') }}"> Dashboard</a>
             </div>
-            <div class="nav-item">
+            <div class="nav-item active">
                 <a href="{{ url_for('view_users') }}"> Manage Users</a>
             </div>
             <div class="nav-item">
                 <a href="{{ url_for('view_admins') }}"> Manage Admins</a>
             </div>
-            <div class="nav-item active">
+            <div class="nav-item">
                 <a href="{{ url_for('view_all_logs') }}"> Manage Logs</a>
             </div>
         </div>
@@ -228,48 +230,38 @@
     <!-- Main Content -->
     <div class="main-content">
         <div class="header">
-            <h1>Fertilizer Logs</h1>
+            <h1>Edit User</h1>
             <button class="logout-btn" onclick="window.location.href='{{ url_for('admin_logout') }}'">Logout</button>
         </div>
         
-        <!-- Logs Section -->
-        <div class="logs-section">
-            <h2>Logs</h2>
-            <table class="logs-table">
-                <thead>
-                    <tr>
-                        <th>Log ID</th>
-                        <th>Username</th>
-                        <th>Name</th>
-                        <th>Nutrient Type</th>
-                        <th>Amount (g)</th>
-                        <th>Post Reading</th>
-                        <th>Status</th>
-                        <th>Timestamp</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for log in logs %}
-                    <tr>
-                        <td>{{ log.id }}</td>
-                        <td>{{ log.username }}</td>
-                        <td>{{ log.name }}</td>
-                        <td>{{ log.nutrient_type }}</td>
-                        <td>{{ log.amount_added }}</td>
-                        <td>{{ log.post_reading if log.post_reading else 'None' }}</td>
-                        <td><span class="nutrient-badge" style="background-color: {{ log.status_color or '#ccc' }}">{{ log.status_color or 'N/A' }}</span></td>                        
-                        <td class="timestamp">{{ log.timestamp }}</td>
-                        <td>
-                            <div class="action-btn-group">
-                                <a href="{{ url_for('edit_log_admin', log_id=log.id) }}" class="action-btn edit">Edit</a>
-                                <a href="{{ url_for('delete_log_admin', log_id=log.id) }}" class="action-btn delete">Delete</a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="section">
+            <h2>User Details</h2>
+            <form method="POST">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" value="{{ user.username }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" value="{{ user.name }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="{{ user.email or '' }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone</label>
+                    <input type="text" id="phone" name="phone" value="{{ user.phone or '' }}">
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-save">Save Changes</button>
+                    <button type="button" class="btn btn-cancel" onclick="window.history.back()">Cancel</button>
+                </div>
+            </form>
         </div>
     </div>
 </body>

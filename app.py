@@ -425,75 +425,279 @@ def view_admins():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("SELECT * FROM users WHERE is_admin = 1")
-    admins = cursor.fetchall()
+    search_query = request.args.get('search', '').strip()
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
+    offset = (page - 1) * per_page
 
-    cursor.close()
+    if search_query:
+        cursor.execute("SELECT COUNT(*) AS total FROM admins WHERE username LIKE %s", (f"%{search_query}%",))
+        total = cursor.fetchone()['total']
+        cursor.execute("SELECT * FROM admins WHERE username LIKE %s LIMIT %s OFFSET %s", 
+                       (f"%{search_query}%", per_page, offset))
+    else:
+        cursor.execute("SELECT COUNT(*) AS total FROM admins")
+        total = cursor.fetchone()['total']
+        cursor.execute("SELECT * FROM admins LIMIT %s OFFSET %s", (per_page, offset))
+
+    admins = cursor.fetchall()
     conn.close()
 
-    return render_template('admin/view_admins.html', admins=admins)
+    # Pagination helper class
+    class Pagination:
+        def __init__(self, page, per_page, total, items):
+            self.page = page
+            self.per_page = per_page
+            self.total = total
+            self.items = items
 
-# View all regular users (admin)
+        @property
+        def pages(self):
+            return (self.total + self.per_page - 1) // self.per_page
+
+        def iter_pages(self, left_edge=2, left_current=2, right_current=5, right_edge=2):
+            last = 0
+            for num in range(1, self.pages + 1):
+                if (
+                    num <= left_edge
+                    or (num >= self.page - left_current and num <= self.page + right_current)
+                    or num > self.pages - right_edge
+                ):
+                    if last + 1 != num:
+                        yield None
+                    yield num
+                    last = num
+
+        @property
+        def has_prev(self):
+            return self.page > 1
+
+        @property
+        def has_next(self):
+            return self.page < self.pages
+
+        @property
+        def prev_num(self):
+            return self.page - 1
+
+        @property
+        def next_num(self):
+            return self.page + 1
+
+    paginated_admins = Pagination(page, per_page, total, admins)
+
+    return render_template("admin/view_admins.html", admins=paginated_admins, search_query=search_query)
+
+# Delete admin (admin only)
+@app.route('/admin/admins/delete/<int:admin_id>')
+@admin_required
+def delete_admins(admin_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Check if admin exists
+    cursor.execute("SELECT * FROM admins WHERE admin_id = %s", (admin_id,))
+    admin = cursor.fetchone()
+
+    if not admin:
+        flash('Admin not found.', 'error')
+        cursor.close()
+        conn.close()
+        return redirect(url_for('view_admins'))
+
+    # Delete the admin
+    cursor.execute("DELETE FROM admins WHERE admin_id = %s", (admin_id,))
+    conn.commit()
+
+    flash('Admin deleted successfully.', 'success')
+    cursor.close()
+    conn.close()
+    return redirect(url_for('view_admins'))
+
+# Edit admin details (for admins, by admin)
+@app.route('/admin/admins/edit/<int:admin_id>', methods=['GET', 'POST'])
+@admin_required
+def edit_admin(admin_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    if request.method == 'POST':
+        username = request.form['username']
+        name = request.form['name']
+
+        cursor.execute("""
+            UPDATE admins
+            SET username = %s, name = %s
+            WHERE admin_id = %s
+        """, (username, name, admin_id))
+        conn.commit()
+
+        flash('Admin updated successfully', 'success')
+        cursor.close()
+        conn.close()
+
+        return redirect(url_for('view_admins'))
+
+    else:
+        cursor.execute("SELECT * FROM admins WHERE admin_id = %s", (admin_id,))
+        admin = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if not admin:
+            flash('Admin not found', 'error')
+            return redirect(url_for('view_admins'))
+
+        return render_template('admin/edit_admin.html', admin=admin)
+
+
+# View all regular users (admin) with pagination and search
 @app.route('/admin/users')
 @admin_required
 def view_users():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("SELECT * FROM users WHERE is_admin = 0")
-    users = cursor.fetchall()
+    search_query = request.args.get('search', '').strip()
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
+    offset = (page - 1) * per_page
 
-    cursor.close()
+    if search_query:
+        cursor.execute("SELECT COUNT(*) AS total FROM users WHERE username LIKE %s", (f"%{search_query}%",))
+        total = cursor.fetchone()['total']
+        cursor.execute("SELECT * FROM users WHERE username LIKE %s LIMIT %s OFFSET %s", 
+                       (f"%{search_query}%", per_page, offset))
+    else:
+        cursor.execute("SELECT COUNT(*) AS total FROM users")
+        total = cursor.fetchone()['total']
+        cursor.execute("SELECT * FROM users LIMIT %s OFFSET %s", (per_page, offset))
+
+    users = cursor.fetchall()
     conn.close()
 
-    return render_template('admin/view_users.html', users=users)
+    # Pagination wrapper object
+    class Pagination:
+        def __init__(self, page, per_page, total, items):
+            self.page = page
+            self.per_page = per_page
+            self.total = total
+            self.items = items
 
-# Edit user (admin)
-@app.route('/admin/users/edit/<int:user_id>', methods=['GET', 'POST'])
-@admin_required
-def edit_user(user_id):
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    if request.method == 'POST':
-        username = request.form['username']
-        is_admin = int(request.form.get('is_admin', 0))
-        cursor.execute("UPDATE users SET username=%s, is_admin=%s WHERE UserID=%s", (username, is_admin, user_id))
-        conn.commit()
-        flash('User updated successfully', 'success')
-        cursor.close()
-        conn.close()
-        # Redirect to appropriate page after update
-        if is_admin:
-            return redirect(url_for('view_admins'))
-        else:
-            return redirect(url_for('view_users'))
-    else:
-        cursor.execute("SELECT * FROM users WHERE UserID=%s", (user_id,))
-        user = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        return render_template('admin/edit_user.html', user=user)
+        @property
+        def pages(self):
+            return (self.total + self.per_page - 1) // self.per_page
 
-# Delete user (admin)
+        def iter_pages(self, left_edge=2, left_current=2, right_current=5, right_edge=2):
+            last = 0
+            for num in range(1, self.pages + 1):
+                if (
+                    num <= left_edge
+                    or (num >= self.page - left_current and num <= self.page + right_current)
+                    or num > self.pages - right_edge
+                ):
+                    if last + 1 != num:
+                        yield None
+                    yield num
+                    last = num
+
+        @property
+        def has_prev(self):
+            return self.page > 1
+
+        @property
+        def has_next(self):
+            return self.page < self.pages
+
+        @property
+        def prev_num(self):
+            return self.page - 1
+
+        @property
+        def next_num(self):
+            return self.page + 1
+
+    paginated_users = Pagination(page, per_page, total, users)
+
+    return render_template("admin/view_users.html", users=paginated_users, search_query=search_query)
+
+
+#delete user (admin)
 @app.route('/admin/users/delete/<int:user_id>')
 @admin_required
 def delete_user(user_id):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT is_admin FROM users WHERE UserID=%s", (user_id,))
+
+    # Check if user exists
+    cursor.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
     user = cursor.fetchone()
-    
-    cursor.execute("DELETE FROM users WHERE UserID = %s", (user_id,))
+
+    if not user:
+        flash('User not found', 'error')
+        cursor.close()
+        conn.close()
+        return redirect(url_for('view_users'))
+
+    # Delete user's fertilizer logs first
+    cursor.execute("DELETE FROM fertilizer_logs WHERE user_id = %s", (user_id,))
     conn.commit()
+
+    # Then delete user
+    cursor.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
+    conn.commit()
+
+    flash('User and their logs deleted successfully.', 'success')
     cursor.close()
     conn.close()
-    flash('User deleted successfully', 'success')
+    return redirect(url_for('view_users'))
 
-    # Redirect depending on the deleted user type
-    if user and user['is_admin']:
-        return redirect(url_for('view_admins'))
-    else:
+
+# Edit user details (for regular users, by admin)
+@app.route('/admin/users/edit/<int:user_id>', methods=['GET', 'POST'])
+@admin_required
+def edit_user(user_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
+    user = cursor.fetchone()
+
+    if not user:
+        cursor.close()
+        conn.close()
+        flash('User not found', 'error')
         return redirect(url_for('view_users'))
+
+    # Prevent editing admin users from this route
+    if user['is_admin']:
+        cursor.close()
+        conn.close()
+        flash('Cannot edit admin users from this page', 'error')
+        return redirect(url_for('view_users'))
+
+    if request.method == 'POST':
+        username = request.form['username']
+        name = request.form['name']
+        email = request.form['email']
+        phone = request.form['phone']
+
+        cursor.execute("""
+            UPDATE users
+            SET username = %s, name = %s, email = %s, phone = %s
+            WHERE user_id = %s
+        """, (username, name, email, phone, user_id))
+        conn.commit()
+
+        flash('User updated successfully', 'success')
+        cursor.close()
+        conn.close()
+        return redirect(url_for('view_users'))
+
+    cursor.close()
+    conn.close()
+    return render_template('admin/edit_user.html', user=user)
+
 
 
 # View all fertilizer logs (admin)
@@ -555,6 +759,7 @@ def delete_log_admin(log_id):
     conn.close()
     flash('Log deleted successfully', 'success')
     return redirect(url_for('view_all_logs'))
+
 
 
 

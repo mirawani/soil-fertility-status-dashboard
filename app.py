@@ -698,22 +698,108 @@ def edit_user(user_id):
     return render_template('admin/edit_user.html', user=user)
 
 
-
-# View all fertilizer logs (admin)
+#view logs(admin)
 @app.route('/admin/logs')
 @admin_required
 def view_all_logs():
+    from math import ceil
+
+    class SimplePagination:
+        def __init__(self, items, page, per_page, total):
+            self.items = items
+            self.page = page
+            self.per_page = per_page
+            self.total = total
+            self.total_pages = ceil(total / per_page)
+
+        @property
+        def has_prev(self):
+            return self.page > 1
+
+        @property
+        def has_next(self):
+            return self.page < self.total_pages
+
+        @property
+        def prev_num(self):
+            return self.page - 1
+
+        @property
+        def next_num(self):
+            return self.page + 1
+
+        def iter_pages(self, left_edge=2, left_current=2, right_current=2, right_edge=2):
+            last = 0
+            for num in range(1, self.total_pages + 1):
+                if (
+                    num <= left_edge
+                    or (num >= self.page - left_current and num <= self.page + right_current)
+                    or num > self.total_pages - right_edge
+                ):
+                    if last + 1 != num:
+                        yield None
+                    yield num
+                    last = num
+
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("""
-        SELECT l.id, u.username, u.name, l.nutrient_type, l.amount_added, l.post_reading, l.status_color, l.timestamp
+
+    # Pagination params
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+    offset = (page - 1) * per_page
+
+    # Get separate search inputs
+    search_query = request.args.get('search', '').strip()
+    date_query = request.args.get('date', '').strip()
+
+    conditions = []
+    values = []
+
+    if search_query:
+        conditions.append("u.username LIKE %s")
+        values.append(f"%{search_query}%")
+
+    if date_query:
+        # Validate date format if necessary (optional)
+        conditions.append("DATE(l.timestamp) = %s")
+        values.append(date_query)
+
+    where_clause = "WHERE " + " AND ".join(conditions) if conditions else ""
+
+    # Count total logs matching filters
+    count_query = f"""
+        SELECT COUNT(*) as total
         FROM fertilizer_logs l
         JOIN users u ON l.user_id = u.user_id
-    """)
-    logs = cursor.fetchall()
+        {where_clause}
+    """
+    cursor.execute(count_query, values)
+    total_logs = cursor.fetchone()['total']
+
+    # Fetch paginated log data
+    data_query = f"""
+        SELECT l.id, u.username, l.nutrient_type, l.amount_added, l.timestamp
+        FROM fertilizer_logs l
+        JOIN users u ON l.user_id = u.user_id
+        {where_clause}
+        ORDER BY l.timestamp DESC
+        LIMIT %s OFFSET %s
+    """
+    cursor.execute(data_query, values + [per_page, offset])
+    log_rows = cursor.fetchall()
+
+    logs = SimplePagination(log_rows, page, per_page, total_logs)
+
     cursor.close()
     conn.close()
-    return render_template('admin/view_logs.html', logs=logs)
+
+    return render_template(
+        'admin/view_logs.html',
+        logs=logs,
+        search_query=search_query,
+        date_query=date_query
+    )
 
 
 # Edit fertilizer log (admin)
@@ -743,7 +829,7 @@ def edit_log_admin(log_id):
         log = cursor.fetchone()
         cursor.close()
         conn.close()
-        return render_template('admin/edit_log.html', log=log)
+        return render_template('admin/edit_log_admin.html', log=log)
 
 
 # Delete fertilizer log (admin)

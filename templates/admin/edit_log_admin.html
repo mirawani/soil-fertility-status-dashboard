@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Fertilizer Log</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9, #a5d6a7, #81c784);
+            min-height: 100vh;
+        }
+        
+        /* ----- Sidebar (Same as Dashboard) ----- */
+        .sidebar {
+            width: 240px;
+            background: rgba(255, 255, 255, 0.85);
+            height: 100vh;
+            position: fixed;
+            padding: 25px 0;
+            backdrop-filter: blur(8px);
+            border-right: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 25px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .sidebar-header h2 {
+            color: #2e7d32;
+            font-weight: 600;
+            font-size: 1.4rem;
+        }
+        
+        .nav-menu {
+            margin-top: 25px;
+        }
+        
+        .nav-item {
+            padding: 14px 25px;
+            transition: all 0.2s;
+            margin: 5px 10px;
+            border-radius: 8px;
+        }
+        
+        .nav-item:hover {
+            background: rgba(76, 175, 80, 0.1);
+        }
+        
+        .nav-item.active {
+            background: rgba(76, 175, 80, 0.15);
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .nav-item a {
+            color: #2e7d32;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        /* ----- Main Content ----- */
+        .main-content {
+            margin-left: 240px;
+            width: calc(100% - 240px);
+            padding: 35px 45px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+        }
+        
+        .header h1 {
+            color: #1b5e20;
+            font-weight: 600;
+            font-size: 1.9rem;
+        }
+        
+        .logout-btn {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(211, 47, 47, 0.2);
+        }
+        
+        /* ----- Edit Form ----- */
+        .section {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(6px);
+        }
+        
+        .section h2 {
+            color: #2e7d32;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(46, 125, 50, 0.2);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2e7d32;
+            font-weight: 500;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-size: 1rem;
+        }
+        
+        .btn-save {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-save:hover {
+            background-color: #3d8b40;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn-cancel {
+            background-color: white;
+            color: #d32f2f;
+            border: 1px solid #d32f2f;
+        }
+        
+        .btn-cancel:hover {
+            background-color: #d32f2f;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(211, 47, 47, 0.3);
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #2e7d32;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+            color: #1b5e20;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>Admin</h2>
+        </div>
+        <div class="nav-menu">
+            <div class="nav-item">
+                <a href="{{ url_for('admin_dashboard') }}"> Dashboard</a>
+            </div>
+            <div class="nav-item">
+                <a href="{{ url_for('view_users') }}"> Manage Users</a>
+            </div>
+            <div class="nav-item">
+                <a href="{{ url_for('view_admins') }}"> Manage Admins</a>
+            </div>
+            <div class="nav-item active">
+                <a href="{{ url_for('view_all_logs') }}"> Manage Logs</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1>Edit Fertilizer Log</h1>
+            <button class="logout-btn" onclick="window.location.href='{{ url_for('admin_logout') }}'">Logout</button>
+        </div>
+
+        <div class="section">
+            <h2>Update Log Entry</h2>
+            <form method="POST">
+                <div class="form-group">
+                    <label for="nutrient_type">Nutrient Type</label>
+                    <select name="nutrient_type" id="nutrient_type" required>
+                        <option value="Nitrogen" {% if log.nutrient_type == 'Nitrogen' %}selected{% endif %}>Nitrogen</option>
+                        <option value="Phosphorus" {% if log.nutrient_type == 'Phosphorus' %}selected{% endif %}>Phosphorus</option>
+                        <option value="Potassium" {% if log.nutrient_type == 'Potassium' %}selected{% endif %}>Potassium</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount_added">Amount Added (g)</label>
+                    <input type="number" name="amount_added" id="amount_added" value="{{ log.amount_added }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="post_reading">Post Reading</label>
+                    <input type="text" name="post_reading" id="post_reading" value="{{ log.post_reading or '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="status_color">Status</label>
+                    <input type="text" name="status_color" id="status_color" value="{{ log.status_color or '' }}">
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-save">Update Log</button>
+                    <a href="{{ url_for('view_all_logs') }}" class="btn btn-cancel">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

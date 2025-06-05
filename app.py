@@ -65,8 +65,7 @@ def register():
             conn.close()
     return render_template('register.html')
 
-
-# Login
+#login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -83,20 +82,25 @@ def login():
         if user and check_password_hash(user['password_hash'], password):
             session['user_id'] = user['user_id']
             session['username'] = user['username']
-            session['name'] = user['name']  # ✅ Store the name in session
-            flash("Login successful.")
-            return redirect(url_for('dashboard'))
+            session['name'] = user['name']
+            flash("Login successful.")  # ✅ Flash mesej
+            return redirect(url_for('dashboard'))  # ✅ Return terus
         else:
             flash("Invalid username or password.")
-    return render_template('login.html')
+            return redirect(url_for('login'))  # ✅ Return supaya tak teruskan bawah
+
+    return render_template('login.html')  # ✅ Untuk GET request sahaja
+
 
 
 # Logout
 @app.route('/logout')
 def logout():
-    session.clear()
-    flash("You have been logged out.")
+    session.pop('user_id', None)
+    session.pop('username', None)
+    session.pop('name', None)
     return redirect(url_for('login'))
+
 
 # Profile View (read-only)
 @app.route('/my-profile')
@@ -368,15 +372,17 @@ def admin_login():
         conn.close()
 
         if admin and check_password_hash(admin['password_hash'], password):
-            session['user_id'] = admin['admin_id']
-            session['username'] = admin['username']
-            session['is_admin'] = True
+            session['admin_id'] = admin['admin_id']
+            session['admin_username'] = admin['username']
             flash('Welcome, admin', 'success')
             return redirect(url_for('admin_dashboard'))
         else:
             flash('Invalid admin credentials', 'danger')
+            return redirect(url_for('admin_login'))  # ✅ Tambah return sini
 
     return render_template('admin/admin_login.html')
+
+
 
 
 #logout
@@ -386,15 +392,17 @@ def admin_logout():
     session.pop('admin_username', None)
     return redirect(url_for('admin_login'))
 
+
 # ------------------ Admin Access Decorator ------------------
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'user_id' not in session or not session.get('is_admin'):
+        if 'admin_id' not in session:
             flash("Admin access only", "danger")
             return redirect(url_for('admin_login'))
         return f(*args, **kwargs)
     return decorated_function
+
 
 # ------------------ Admin Dashboard ------------------
 @app.route('/admin')

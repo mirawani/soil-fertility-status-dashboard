@@ -352,9 +352,7 @@
                         <td>{{ user.user_id }}</td>
                         <td>{{ user.username }}</td>
                         <td>
-                            <span class="badge {% if user.is_admin %}admin{% else %}user{% endif %}">
-                                {% if user.is_admin %}Admin{% else %}User{% endif %}
-                            </span>
+                        <span class="badge user">User</span>
                         </td>
                         <td>
                             <a href="{{ url_for('edit_user', user_id=user.user_id) }}" class="action-link edit">Edit</a>

@@ -142,6 +142,19 @@
         
         <h2>Admin Login</h2>
         
+        {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      {% if 'admin' in category %}
+        <div class="alert alert-{{ 'success' if 'success' in category else 'danger' }}">
+          {{ message }}
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+
         <form method="POST" action="{{ url_for('admin_login') }}">
             <div class="form-group">
                 <label for="username">Username</label>

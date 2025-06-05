@@ -342,6 +342,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Username</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -350,6 +351,9 @@
                     <tr>
                         <td>{{ admin.admin_id }}</td>
                         <td>{{ admin.username }}</td>
+                        <td>
+                        <span class="badge user">Admin</span>
+                        </td>
                         <td>
                             <a href="{{ url_for('edit_admin', admin_id=admin.admin_id) }}" class="action-link edit">Edit</a>
                             <a href="javascript:void(0)" class="action-link delete" onclick="confirmDelete({{ admin.admin_id }})">Delete</a>

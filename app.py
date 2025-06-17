@@ -24,7 +24,7 @@ def get_db_connection():
 # Home Dashboard
 @app.route('/')
 def dashboard():
-    embed_url = "https://app.powerbi.com/view?r=eyJrIjoiNjM0ZjllYmYtYTNiZS00N2FlLThlYjYtY2Q2OGYwYzQwNDNlIiwidCI6ImNkY2JiMGUyLTlmZWEtNGY1NC04NjcwLTY3MjcwNzc5N2FkYSIsImMiOjEwfQ%3D%3D"
+    embed_url = "https://app.powerbi.com/view?r=eyJrIjoiZWE1YjQxYTYtYjlhNy00NDFlLTgzYjItOGZiNGNiYWY4ODg4IiwidCI6ImNkY2JiMGUyLTlmZWEtNGY1NC04NjcwLTY3MjcwNzc5N2FkYSIsImMiOjEwfQ%3D%3D"
     return render_template('dashboard.html', embed_url=embed_url)
 
 

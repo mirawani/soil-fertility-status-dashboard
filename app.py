@@ -3,6 +3,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import mysql.connector
 from datetime import datetime
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -11,14 +14,17 @@ app.secret_key = 'your_secret_key'
 ITEMS_PER_PAGE = 10
 
 db_config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'Root@7x!pl9',
-    'database': 'soil_fertility'
+    'host': 'dpg-d1dmefmr433s73fievl0-a.oregon-postgres.render.com',
+    'database': 'soil_fertilitydb',
+    'user': 'mirawani',
+    'password': 'R3S5cg3BFHnmveBfmCRDtyzV6nF3RBiB',
+    'port': 5432,
+    'sslmode': 'require'  # ✅ Must be a string!
 }
 
 def get_db_connection():
-    return mysql.connector.connect(**db_config)
+    return psycopg2.connect(**db_config)
+
 
 
 # Home Dashboard
@@ -48,7 +54,7 @@ def register():
         password = request.form['password']
         password_hash = generate_password_hash(password)
 
-        conn = mysql.connector.connect(**db_config)
+        conn = get_db_connection()
         cursor = conn.cursor()
         try:
             cursor.execute(
@@ -58,7 +64,7 @@ def register():
             conn.commit()
             flash("Registration successful. Please login.")
             return redirect(url_for('login'))
-        except mysql.connector.IntegrityError:
+        except psycopg2.IntegrityError:
             flash("Username already exists.")
         finally:
             cursor.close()
@@ -72,8 +78,8 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        conn = mysql.connector.connect(**db_config)
-        cursor = conn.cursor(dictionary=True)
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
         cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
         user = cursor.fetchone()
         cursor.close()
@@ -109,8 +115,8 @@ def my_profile():
         return redirect(url_for('login'))
 
     user_id = session['user_id']
-    conn = mysql.connector.connect(**db_config)
-    cursor = conn.cursor(dictionary=True)
+    conn = get_db_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     
     cursor.execute("SELECT username, name, email, phone FROM users WHERE user_id=%s", (user_id,))
     user = cursor.fetchone()
@@ -126,8 +132,8 @@ def profile_edit():
         return redirect(url_for('login'))
 
     user_id = session['user_id']
-    conn = mysql.connector.connect(**db_config)
-    cursor = conn.cursor(dictionary=True)
+    conn = get_db_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     if request.method == 'POST':
         email = request.form['email']
@@ -171,8 +177,8 @@ def fertilizer_log():
     search_date = request.args.get('search_date', '')
     nutrient_filter = request.args.get('nutrient_type', '')
 
-    conn = mysql.connector.connect(**db_config)
-    cursor = conn.cursor(dictionary=True)
+    conn = get_db_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     # Base query
     query = "SELECT * FROM fertilizer_logs WHERE user_id = %s"
@@ -270,8 +276,8 @@ def edit_log(log_id):
         return redirect(url_for('login'))
 
     user_id = session['user_id']
-    conn = mysql.connector.connect(**db_config)
-    cursor = conn.cursor(dictionary=True)
+    conn = get_db_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     # Check ownership
     cursor.execute("SELECT * FROM fertilizer_logs WHERE id = %s AND user_id = %s", (log_id, user_id))
@@ -310,7 +316,7 @@ def delete_log(log_id):
         return redirect(url_for('login'))
 
     user_id = session['user_id']
-    conn = mysql.connector.connect(**db_config)
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM fertilizer_logs WHERE id = %s AND user_id = %s", (log_id, user_id))
@@ -365,7 +371,7 @@ def admin_login():
         password = request.form['password']
 
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
         cursor.execute("SELECT * FROM admins WHERE username = %s", (username,))
         admin = cursor.fetchone()
         cursor.close()
@@ -430,7 +436,7 @@ def admin_dashboard():
 @admin_required
 def view_admins():
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     search_query = request.args.get('search', '').strip()
     page = request.args.get('page', 1, type=int)
@@ -500,7 +506,7 @@ def view_admins():
 @admin_required
 def delete_admins(admin_id):
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     # Check if admin exists
     cursor.execute("SELECT * FROM admins WHERE admin_id = %s", (admin_id,))
@@ -526,7 +532,7 @@ def delete_admins(admin_id):
 @admin_required
 def edit_admin(admin_id):
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     if request.method == 'POST':
         username = request.form['username']
@@ -563,7 +569,7 @@ def edit_admin(admin_id):
 @admin_required
 def view_users():
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     search_query = request.args.get('search', '').strip()
     page = request.args.get('page', 1, type=int)
@@ -634,7 +640,7 @@ def view_users():
 @admin_required
 def delete_user(user_id):
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     # Check if user exists
     cursor.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
@@ -665,7 +671,7 @@ def delete_user(user_id):
 @admin_required
 def edit_user(user_id):
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     cursor.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
     user = cursor.fetchone()
@@ -749,7 +755,7 @@ def view_all_logs():
                     last = num
 
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     # Pagination params
     page = request.args.get('page', 1, type=int)
@@ -826,7 +832,7 @@ def view_all_logs():
 @admin_required
 def edit_log_admin(log_id):
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     if request.method == 'POST':
         nutrient_type = request.form['nutrient_type']
         amount_added = request.form['amount_added']

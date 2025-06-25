@@ -8,3 +8,11 @@ services:
     envVars:
       - key: FLASK_ENV
         value: production
+      - key: DB_HOST
+        value: dpg-d1dmefmr433s73fievl0-a.oregon-postgres.render.com
+      - key: DB_NAME
+        value: soil_fertilitydb
+      - key: DB_USER
+        value: mirawani
+      - key: DB_PASSWORD
+        value: R3S5cg3BFHnmveBfmCRDtyzV6nF3RBiB

@@ -6,7 +6,6 @@ from datetime import datetime
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 

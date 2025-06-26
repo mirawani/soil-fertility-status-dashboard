@@ -65,10 +65,10 @@ def sync_realtime_data():
             pg_cursor = pg_conn.cursor()
 
             for key, entry in data.items():
-                nitrogen = entry.get('nitrogen')
-                phosphorus = entry.get('phosphorus')
-                potassium = entry.get('potassium')
-                humidity = entry.get('humidity')
+                nitrogen = entry.get('N')
+                phosphorus = entry.get('P')
+                potassium = entry.get('K')
+                humidity = entry.get('moisture')
                 temperature = entry.get('temperature')
                 timestamp = entry.get('timestamp') or datetime.now()
 

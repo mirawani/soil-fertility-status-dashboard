@@ -16,6 +16,5 @@ services:
         value: mirawani
       - key: DB_PASSWORD
         value: R3S5cg3BFHnmveBfmCRDtyzV6nF3RBiB
-    secretFiles:
-      - name: firebase.json
-        mountPath: /etc/secrets/firebase.json
+    envVarsGroups:
+      - name: firebasesoilfertility

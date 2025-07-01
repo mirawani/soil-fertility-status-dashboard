@@ -1,61 +1,41 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-import mysql.connector
 from datetime import datetime
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import firebase_admin
 from firebase_admin import credentials, db
-
-import os  # For future use, like loading from env if needed
+import os
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
-# Pagination setting
+# Pagination
 ITEMS_PER_PAGE = 10
 
-# PostgreSQL (Render) config
+# PostgreSQL config (Render)
 db_config = {
     'host': 'dpg-d1dmefmr433s73fievl0-a.oregon-postgres.render.com',
     'database': 'soil_fertilitydb',
     'user': 'mirawani',
     'password': 'R3S5cg3BFHnmveBfmCRDtyzV6nF3RBiB',
     'port': 5432,
-    'sslmode': 'require'  # string
+    'sslmode': 'require'
 }
 
 def get_db_connection():
     return psycopg2.connect(**db_config)
 
-# ✅ Prevent Firebase from re-initializing (important when using auto-reload in Flask)
+# Firebase initialization (secret file should be mounted in /etc/secrets/firebase.json)
 if not firebase_admin._apps:
     cred = credentials.Certificate("/etc/secrets/firebase.json")
     firebase_admin.initialize_app(cred, {
         'databaseURL': "https://smart-soil-detection-iot-default-rtdb.asia-southeast1.firebasedatabase.app"
     })
 
-# ✅ MySQL (localhost) connection
-try:
-    mysql_conn = mysql.connector.connect(
-        host='localhost',
-        user='root',
-        password='Root@7x!pl9',
-        database='soil_fertility'
-    )
-    mysql_cursor = mysql_conn.cursor()
-except Exception as e:
-    print("MySQL connection error:", e)
-    mysql_conn = None
-    mysql_cursor = None
-
-# ✅ Firebase sync function
+# ✅ Only sync to PostgreSQL
 def sync_realtime_data():
-    if not mysql_cursor or not mysql_conn:
-        print("MySQL connection not available")
-        return
-
     ref = db.reference('/realtime')
     data = ref.get()
 
@@ -72,19 +52,11 @@ def sync_realtime_data():
                 temperature = entry.get('temperature')
                 timestamp = entry.get('timestamp') or datetime.now()
 
-                # Insert into PostgreSQL
                 pg_cursor.execute("""
                     INSERT INTO realtime (RNitrogen, RPhosphorus, RPotassium, RHumidity, RTemperature, RTimestamp)
                     VALUES (%s, %s, %s, %s, %s, %s)
                 """, (nitrogen, phosphorus, potassium, humidity, temperature, timestamp))
                 pg_conn.commit()
-
-                # Insert into MySQL
-                mysql_cursor.execute("""
-                    INSERT INTO realtime (RNitrogen, RPhosphorus, RPotassium, RHumidity, RTemperature, RTimestamp)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                """, (nitrogen, phosphorus, potassium, humidity, temperature, timestamp))
-                mysql_conn.commit()
 
             pg_cursor.close()
             pg_conn.close()

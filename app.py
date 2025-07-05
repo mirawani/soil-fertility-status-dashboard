@@ -36,7 +36,7 @@ if not firebase_admin._apps:
 
 # ✅ Only sync to PostgreSQL
 def sync_realtime_data():
-    ref = db.reference('/realtime')
+    ref = db.reference('/soil')
     data = ref.get()
 
     if data:
